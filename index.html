@@ -73,7 +73,7 @@
     .hand-chip.active{background:white;color:#0b4d2b;font-weight:800}
 
     .actions{
-      display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0
+      display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:12px 0
     }
     .actions button{
       min-height:54px;border:0;border-radius:13px;background:var(--button);
@@ -95,6 +95,7 @@
     }
     .why-btn{background:#fff;color:#7f1d1d}
     .next-btn{background:#fff;color:#064e3b}
+    .new-hand-btn{background:#bae6fd !important;color:#0c4a6e !important}
 
     .stats{
       display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px
@@ -172,6 +173,7 @@
     <button id="standBtn">Stand</button>
     <button id="splitBtn">Split</button>
     <button id="doubleBtn">Double</button>
+    <button id="newHandBtn" class="new-hand-btn">New Hand</button>
   </div>
 
   <section id="feedback" class="feedback">
@@ -183,10 +185,6 @@
   <div class="stats">
     <div class="stat"><b id="streak">0</b><span>Current streak</span></div>
     <div class="stat"><b id="accuracy">—</b><span>Correct this session</span></div>
-  </div>
-
-  <div style="margin-top:10px">
-    <button id="newHandBtn" class="next-btn" style="width:100%">New Hand</button>
   </div>
 
   <div class="footer">Session stats reset when the page/app is fully restarted.</div>
@@ -218,6 +216,21 @@
       </label>
     </div>
 
+    <div class="setting-row">
+      <div>
+        <strong>Dealer Card Delay</strong>
+        <div style="font-size:12px;color:#6b7280;margin-top:3px">Delay between dealer cards.</div>
+      </div>
+      <select id="dealerDelaySetting" style="font-size:16px;padding:8px;border-radius:10px;border:1px solid #cbd5e1;background:white">
+        <option value="500">0.5 sec</option>
+        <option value="1000">1.0 sec</option>
+        <option value="1500">1.5 sec</option>
+        <option value="2000">2.0 sec</option>
+        <option value="2500">2.5 sec</option>
+        <option value="3000">3.0 sec</option>
+      </select>
+    </div>
+
     <button id="closeSettingsBtn" class="close-btn">Done</button>
   </div>
 </div>
@@ -234,8 +247,9 @@ let activeHandIndex=0;
 let handInProgress=false;
 let decisionOpen=false;
 let lastExplanation="";
-let settings={allowSplit:true,allowDouble:true};
+let settings={allowSplit:true,allowDouble:true,dealerDelay:2000};
 let stats={correct:0,attempts:0,streak:0};
+let dealerAnimating=false;
 
 function buildDeck(){
   deck=[];
@@ -296,9 +310,13 @@ function canDouble(hand){
   return settings.allowDouble && !hand.finished && hand.cards.length===2;
 }
 
-function render(revealDealer=false){
-  $("dealerCards").innerHTML=dealer.map((c,i)=>renderCard(c,!revealDealer&&i===1)).join("");
-  $("dealerTotal").textContent=dealer.length
+function render(revealDealer=false,dealerVisibleCount=null){
+  const visibleCount=dealerVisibleCount===null?dealer.length:dealerVisibleCount;
+  $("dealerCards").innerHTML=dealer.map((c,i)=>{
+    if(i>=visibleCount) return "";
+    return renderCard(c,!revealDealer&&i===1);
+  }).join("");
+  $("dealerTotal").textContent=dealer.length&&visibleCount>0
     ? (revealDealer?`Total: ${handValue(dealer).total}`:`Showing: ${cardValue(dealer[0])}`)
     : "Showing: —";
 
@@ -323,7 +341,7 @@ function render(revealDealer=false){
     $("handStrip").innerHTML="";
   }
 
-  const enabled=handInProgress && hand && !hand.finished;
+  const enabled=handInProgress && hand && !hand.finished && !dealerAnimating;
   $("hitBtn").disabled=!enabled;
   $("standBtn").disabled=!enabled;
   $("splitBtn").disabled=!enabled || !canSplit(hand);
@@ -471,14 +489,28 @@ function nextPlayableHand(){
   finishRound();
 }
 
-function dealerPlay(){
-  while(handValue(dealer).total<17) dealer.push(draw());
+function sleep(ms){
+  return new Promise(resolve=>setTimeout(resolve,ms));
 }
 
-function finishRound(){
+async function dealerPlayAnimated(){
+  dealerAnimating=true;
+  render(true,2);
+  await sleep(settings.dealerDelay);
+
+  while(handValue(dealer).total<17){
+    dealer.push(draw());
+    render(true,dealer.length);
+    await sleep(settings.dealerDelay);
+  }
+
+  dealerAnimating=false;
+}
+
+async function finishRound(){
   handInProgress=false;
   decisionOpen=false;
-  dealerPlay();
+  await dealerPlayAnimated();
   render(true);
 
   const dealerTotal=handValue(dealer).total;
@@ -490,10 +522,8 @@ function finishRound(){
     if(p<dealerTotal) return `Hand ${i+1}: loss ${p}–${dealerTotal}`;
     return `Hand ${i+1}: push ${p}`;
   });
-
   setFeedback("Hand complete",results.join(" • "));
 }
-
 function stand(){
   if(!handInProgress) return;
   scoreDecision("stand");
@@ -569,18 +599,31 @@ function dealTrainableRound(){
   return {p,d};
 }
 
-function newHand(){
+async function newHand(){
+  if(dealerAnimating) return;
+
   const dealt=dealTrainableRound();
   dealer=dealt.d;
   hands=[{cards:dealt.p,finished:false,doubled:false}];
   activeHandIndex=0;
   handInProgress=true;
-  decisionOpen=true;
+  decisionOpen=false;
+  dealerAnimating=true;
 
+  setFeedback("Dealing","Dealer is dealing the hand.");
+  render(false,0);
+
+  await sleep(settings.dealerDelay);
+  render(false,1);
+
+  await sleep(settings.dealerDelay);
+  render(false,2);
+
+  dealerAnimating=false;
+  decisionOpen=true;
   setFeedback("Your decision",`Dealer shows ${dealer[0].r}${dealer[0].s}. Choose the best play.`);
   render(false);
 }
-
 $("hitBtn").onclick=hit;
 $("standBtn").onclick=stand;
 $("splitBtn").onclick=splitHand;
@@ -604,10 +647,17 @@ $("doubleSetting").onchange=e=>{
   render(false);
 };
 
+$("dealerDelaySetting").onchange=e=>{
+  settings.dealerDelay=Number(e.target.value);
+  localStorage.setItem("bjDealerDelay",String(settings.dealerDelay));
+};
+
 settings.allowSplit=localStorage.getItem("bjAllowSplit")!=="0";
 settings.allowDouble=localStorage.getItem("bjAllowDouble")!=="0";
+settings.dealerDelay=Number(localStorage.getItem("bjDealerDelay")||"2000");
 $("splitSetting").checked=settings.allowSplit;
 $("doubleSetting").checked=settings.allowDouble;
+$("dealerDelaySetting").value=String(settings.dealerDelay);
 
 buildDeck();
 updateStats();
