@@ -43,7 +43,7 @@
 
     .app{max-width:720px;margin:0 auto}
     .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px}
-    h1{font-size:23px;margin:0}
+    h1{font-size:28px;margin:0}
     .icon-btn{
       width:44px;height:44px;border-radius:50%;border:1px solid var(--line);
       background:var(--panel-strong);color:white;font-size:21px;font-weight:700
@@ -51,8 +51,8 @@
 
     .section{padding:10px 0}
     .label-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-    .label{font-size:15px;font-weight:800;letter-spacing:.2px}
-    .total{font-size:14px;color:var(--muted)}
+    .label{font-size:20px;font-weight:800;letter-spacing:.2px}
+    .total{font-size:18px;color:var(--muted)}
     .cards{display:flex;gap:8px;flex-wrap:wrap;min-height:98px}
 
     .card{
@@ -81,7 +81,7 @@
     }
     .actions button{
       min-height:54px;border:0;border-radius:13px;background:var(--button);
-      color:var(--button-text);font-size:15px;font-weight:850
+      color:var(--button-text);font-size:18px;font-weight:850
     }
     .actions button:disabled{opacity:.34}
 
@@ -91,11 +91,11 @@
     }
     .feedback.good{background:var(--good);color:var(--good-text);border-color:transparent}
     .feedback.bad{background:var(--bad);color:var(--bad-text);border-color:transparent}
-    .feedback-title{font-size:17px;font-weight:850;margin-bottom:4px}
-    .feedback-text{font-size:13px;line-height:1.45}
+    .feedback-title{font-size:22px;font-weight:850;margin-bottom:4px}
+    .feedback-text{font-size:17px;line-height:1.45}
     .feedback-actions{margin-top:10px}
     .why-btn,.next-btn{
-      border:0;border-radius:11px;padding:10px 13px;font-size:14px;font-weight:800
+      border:0;border-radius:11px;padding:10px 13px;font-size:17px;font-weight:800
     }
     .why-btn{background:#fff;color:#7f1d1d}
     .next-btn{background:#fff;color:#064e3b}
@@ -108,9 +108,9 @@
       background:var(--panel);border:1px solid var(--line);border-radius:14px;
       text-align:center;padding:10px
     }
-    .stat b{display:block;font-size:22px}
-    .stat span{font-size:12px;color:var(--muted)}
-    .footer{font-size:11px;color:var(--muted);text-align:center;margin-top:14px}
+    .stat b{display:block;font-size:28px}
+    .stat span{font-size:16px;color:var(--muted)}
+    .footer{font-size:14px;color:var(--muted);text-align:center;margin-top:14px}
 
     .modal-backdrop{
       position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;
@@ -139,7 +139,7 @@
     .switch input:checked + .slider:before{transform:translateX(22px)}
     .close-btn{
       width:100%;margin-top:18px;border:0;border-radius:13px;padding:13px;
-      background:#111827;color:white;font-size:16px;font-weight:800
+      background:#111827;color:white;font-size:19px;font-weight:800
     }
 
     @media(max-width:390px){
@@ -165,7 +165,7 @@
 
   <section class="section">
     <div class="label-row">
-      <div class="label">Your hand</div>
+      <div id="playerLabel" class="label">YOU</div>
       <div id="playerTotal" class="total">Total: —</div>
     </div>
     <div id="handStrip" class="hand-strip" style="display:none"></div>
@@ -201,7 +201,7 @@
     <div class="setting-row">
       <div>
         <strong>Allow Split</strong>
-        <div style="font-size:12px;color:#6b7280;margin-top:3px">Show and score split decisions.</div>
+        <div style="font-size:15px;color:#6b7280;margin-top:3px">Show and score split decisions.</div>
       </div>
       <label class="switch">
         <input id="splitSetting" type="checkbox" checked />
@@ -212,7 +212,7 @@
     <div class="setting-row">
       <div>
         <strong>Allow Double</strong>
-        <div style="font-size:12px;color:#6b7280;margin-top:3px">Show and score double-down decisions.</div>
+        <div style="font-size:15px;color:#6b7280;margin-top:3px">Show and score double-down decisions.</div>
       </div>
       <label class="switch">
         <input id="doubleSetting" type="checkbox" checked />
@@ -222,10 +222,19 @@
 
     <div class="setting-row">
       <div>
-        <strong>Background</strong>
-        <div style="font-size:12px;color:#6b7280;margin-top:3px">Choose the table background.</div>
+        <strong>Player Name</strong>
+        <div style="font-size:15px;color:#6b7280;margin-top:3px">Change the label shown above your cards.</div>
       </div>
-      <select id="backgroundSetting" style="font-size:16px;padding:8px;border-radius:10px;border:1px solid #cbd5e1;background:white">
+      <input id="playerNameSetting" type="text" maxlength="20" value="YOU"
+        style="width:130px;font-size:18px;padding:9px 10px;border-radius:10px;border:1px solid #cbd5e1;background:white;color:#111827;text-align:right" />
+    </div>
+
+    <div class="setting-row">
+      <div>
+        <strong>Background</strong>
+        <div style="font-size:15px;color:#6b7280;margin-top:3px">Choose the table background.</div>
+      </div>
+      <select id="backgroundSetting" style="font-size:18px;padding:9px;border-radius:10px;border:1px solid #cbd5e1;background:white">
         <option value="green">Green</option>
         <option value="black">Black</option>
       </select>
@@ -234,7 +243,7 @@
     <div class="setting-row">
       <div>
         <strong>Dealer hits soft 17</strong>
-        <div style="font-size:12px;color:#6b7280;margin-top:3px">On by default.</div>
+        <div style="font-size:15px;color:#6b7280;margin-top:3px">On by default.</div>
       </div>
       <label class="switch">
         <input id="soft17Setting" type="checkbox" checked />
@@ -245,9 +254,9 @@
     <div class="setting-row">
       <div>
         <strong>Dealer Card Delay</strong>
-        <div style="font-size:12px;color:#6b7280;margin-top:3px">Delay between dealer cards.</div>
+        <div style="font-size:15px;color:#6b7280;margin-top:3px">Delay between dealer cards.</div>
       </div>
-      <select id="dealerDelaySetting" style="font-size:16px;padding:8px;border-radius:10px;border:1px solid #cbd5e1;background:white">
+      <select id="dealerDelaySetting" style="font-size:18px;padding:9px;border-radius:10px;border:1px solid #cbd5e1;background:white">
         <option value="500">0.5 sec</option>
         <option value="1000">1.0 sec</option>
         <option value="1500">1.5 sec</option>
@@ -273,7 +282,7 @@ let activeHandIndex=0;
 let handInProgress=false;
 let decisionOpen=false;
 let lastExplanation="";
-let settings={allowSplit:true,allowDouble:true,dealerDelay:2000,background:"green",hitSoft17:true};
+let settings={allowSplit:true,allowDouble:true,dealerDelay:2000,background:"green",hitSoft17:true,playerName:"YOU"};
 let stats={correct:0,attempts:0,streak:0};
 let dealerAnimating=false;
 
@@ -688,6 +697,13 @@ $("dealerDelaySetting").onchange=e=>{
   localStorage.setItem("bjDealerDelay",String(settings.dealerDelay));
 };
 
+$("playerNameSetting").oninput=e=>{
+  const cleaned=e.target.value.trim().slice(0,20);
+  settings.playerName=cleaned || "YOU";
+  localStorage.setItem("bjPlayerName",settings.playerName);
+  $("playerLabel").textContent=settings.playerName;
+};
+
 $("backgroundSetting").onchange=e=>{
   settings.background=e.target.value;
   localStorage.setItem("bjBackground",settings.background);
@@ -704,12 +720,15 @@ settings.allowDouble=localStorage.getItem("bjAllowDouble")!=="0";
 settings.dealerDelay=Number(localStorage.getItem("bjDealerDelay")||"2000");
 settings.background=localStorage.getItem("bjBackground")||"green";
 settings.hitSoft17=localStorage.getItem("bjHitSoft17")!=="0";
+settings.playerName=localStorage.getItem("bjPlayerName")||"YOU";
 
 $("splitSetting").checked=settings.allowSplit;
 $("doubleSetting").checked=settings.allowDouble;
 $("dealerDelaySetting").value=String(settings.dealerDelay);
 $("backgroundSetting").value=settings.background;
 $("soft17Setting").checked=settings.hitSoft17;
+$("playerNameSetting").value=settings.playerName;
+$("playerLabel").textContent=settings.playerName;
 document.body.classList.toggle("black-theme",settings.background==="black");
 
 buildDeck();
