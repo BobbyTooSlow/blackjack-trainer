@@ -935,6 +935,14 @@ function render(revealDealer=false){
   if(handInProgress && !dealerAnimating && !oddsRevealed){
     setRevealOddsBox();
   }
+
+  // Keep SHOW / ODDS visible whenever the player is choosing an action.
+  if(handInProgress && !dealerAnimating){
+    const current=activeHand();
+    if(current && !current.finished && !oddsRevealed){
+      setRevealOddsBox();
+    }
+  }
 }
 
 function renderDecisionBox(){
@@ -1136,7 +1144,8 @@ let oddsRevealed=false;
 
 function setRevealOddsBox(){
   const box=$("outcome");
-  if(!box || !handInProgress) return;
+  const hand=activeHand();
+  if(!box || !handInProgress || dealerAnimating || !hand || hand.finished) return;
 
   box.className="outcome reveal-odds";
   box.innerHTML=`<span class="reveal-top">SHOW</span><span class="reveal-bottom">ODDS</span>`;
@@ -1497,6 +1506,8 @@ function newHand(){
   };
   renderDecisionBox();
   render(false);
+
+  setTimeout(()=>setRevealOddsBox(),0);
 }
 
 $("hitBtn").onclick=hit;
