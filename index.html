@@ -10,188 +10,458 @@
   <style>
     :root{
       --felt:#0f6b3b;
-      --felt-dark:#0b4d2b;
-      --panel:rgba(0,0,0,.22);
-      --panel-strong:rgba(0,0,0,.34);
+      --felt-dark:#083f25;
       --text:#fff;
-      --muted:rgba(255,255,255,.72);
-      --line:rgba(255,255,255,.16);
-      --button:#f3f4f6;
-      --button-text:#111827;
-      --good:#d1fae5;
-      --good-text:#065f46;
-      --bad:#fee2e2;
-      --bad-text:#991b1b;
+      --muted:rgba(255,255,255,.78);
+      --line:rgba(255,255,255,.18);
+      --panel:rgba(0,0,0,.30);
+      --panel2:rgba(0,0,0,.42);
       --card:#fff;
-      --ink:#111827;
+      --ink:#111;
+      --hit:#15803d;
+      --stand:#dc2626;
+      --split:#7e22ce;
+      --double:#ea580c;
+      --new:#93c5fd;
+      --newText:#0c4a6e;
     }
 
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-    html,body{margin:0;min-height:100%;background:var(--felt);color:var(--text);
-      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+
+    html,body{
+      margin:0;
+      min-height:100%;
+      background:var(--felt);
+      color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    }
+
     body{
-      padding:calc(env(safe-area-inset-top) + 10px) 14px calc(env(safe-area-inset-bottom) + 18px);
-      background:
-        radial-gradient(circle at 50% 15%, rgba(255,255,255,.05), transparent 34%),
-        linear-gradient(var(--felt),var(--felt-dark));
       min-height:100vh;
+      padding:
+        calc(env(safe-area-inset-top) + 8px)
+        12px
+        calc(env(safe-area-inset-bottom) + 14px);
+      background:
+        radial-gradient(circle at 50% 10%,rgba(255,255,255,.045),transparent 34%),
+        linear-gradient(var(--felt),var(--felt-dark));
     }
+
     body.black-theme{
-      --felt:#111111;
-      --felt-dark:#000000;
+      --felt:#161616;
+      --felt-dark:#000;
     }
 
-    .app{max-width:720px;margin:0 auto}
-    .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px}
-    h1{font-size:28px;margin:0}
-    .icon-btn{
-      width:44px;height:44px;border-radius:50%;border:1px solid var(--line);
-      background:var(--panel-strong);color:white;font-size:21px;font-weight:700
+    .app{
+      width:100%;
+      max-width:760px;
+      margin:0 auto;
     }
 
-    .section{padding:10px 0}
-    .label-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-    .label{font-size:20px;font-weight:800;letter-spacing:.2px}
-    .total{font-size:18px;color:var(--muted)}
-    .cards{display:flex;gap:8px;flex-wrap:wrap;min-height:98px}
+    .section{
+      padding:4px 0 10px;
+    }
+
+    .dealer-section{
+      padding-top:0;
+    }
+
+    .divider{
+      height:1px;
+      background:var(--line);
+      margin:8px 0 10px;
+    }
+
+    .label{
+      font-size:24px;
+      line-height:1.05;
+      font-weight:900;
+      letter-spacing:.3px;
+      margin:0 0 8px 2px;
+    }
+
+    .cards{
+      display:flex;
+      justify-content:flex-start;
+      align-items:flex-start;
+      gap:10px;
+      flex-wrap:wrap;
+      min-height:122px;
+    }
 
     .card{
-      width:64px;height:92px;border-radius:10px;background:var(--card);color:var(--ink);
-      padding:7px;display:flex;flex-direction:column;justify-content:space-between;
-      font-weight:800;box-shadow:0 5px 12px rgba(0,0,0,.32);border:1px solid rgba(0,0,0,.12)
+      width:82px;
+      height:118px;
+      border-radius:11px;
+      background:var(--card);
+      color:var(--ink);
+      padding:7px 8px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      border:1px solid rgba(0,0,0,.15);
+      box-shadow:0 5px 13px rgba(0,0,0,.30);
+      font-weight:900;
+      font-size:29px;
+      line-height:1;
     }
-    .card.red{color:#dc2626}
+
+    .card .corner{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-start;
+      gap:1px;
+    }
+
+    .card .suit-big{
+      align-self:flex-end;
+      font-size:36px;
+      line-height:.9;
+      padding-right:2px;
+    }
+
+    .card.red{color:#c81e1e}
+
     .card.hidden{
-      background:repeating-linear-gradient(45deg,#1f2937 0,#1f2937 6px,#374151 6px,#374151 12px);
-      border:2px solid #d1d5db
+      background:
+        repeating-linear-gradient(45deg,#0d2c67 0,#0d2c67 5px,#17478f 5px,#17478f 10px);
+      border:3px solid #e5e7eb;
     }
-    .card.hidden span{visibility:hidden}
+    .card.hidden *{visibility:hidden}
 
     .hand-strip{
-      display:flex;gap:8px;overflow-x:auto;padding:2px 0 4px;margin-bottom:4px
+      display:flex;
+      gap:8px;
+      overflow-x:auto;
+      margin:-1px 0 8px;
     }
+
     .hand-chip{
-      border:1px solid var(--line);background:var(--panel);color:white;border-radius:999px;
-      padding:7px 10px;font-size:12px;white-space:nowrap
+      border:1px solid var(--line);
+      background:var(--panel);
+      color:white;
+      border-radius:999px;
+      padding:7px 11px;
+      font-size:15px;
+      white-space:nowrap;
     }
-    .hand-chip.active{background:white;color:#0b4d2b;font-weight:800}
+
+    .hand-chip.active{
+      background:white;
+      color:#064e3b;
+      font-weight:900;
+    }
 
     .actions{
-      display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:12px 0
+      width:100%;
+      display:grid;
+      grid-template-columns:repeat(5,minmax(0,1fr));
+      gap:7px;
+      margin:10px 0;
     }
+
     .actions button{
-      min-height:54px;border:0;border-radius:13px;background:var(--button);
-      color:var(--button-text);font-size:18px;font-weight:850
+      border:0;
+      border-radius:12px;
+      min-height:58px;
+      padding:6px 3px;
+      color:white;
+      font-size:18px;
+      font-weight:900;
+      letter-spacing:.1px;
     }
+
+    #hitBtn{background:var(--hit)}
+    #standBtn{background:var(--stand)}
+    #splitBtn{background:var(--split)}
+    #doubleBtn{background:var(--double)}
+    #newHandBtn{
+      background:var(--new);
+      color:var(--newText);
+    }
+
     .actions button:disabled{opacity:.34}
 
-    .feedback{
-      background:var(--panel-strong);border:1px solid var(--line);
-      border-radius:16px;padding:13px;margin-top:8px
+    /* Keep Split/Double slots reserved so New Hand never moves. */
+    .slot-hidden{
+      visibility:hidden !important;
+      pointer-events:none !important;
     }
-    .feedback.good{background:var(--good);color:var(--good-text);border-color:transparent}
-    .feedback.bad{background:var(--bad);color:var(--bad-text);border-color:transparent}
-    .feedback-title{font-size:22px;font-weight:850;margin-bottom:4px}
-    .feedback-text{font-size:17px;line-height:1.45}
-    .feedback-actions{margin-top:10px}
-    .why-btn,.next-btn{
-      border:0;border-radius:11px;padding:10px 13px;font-size:17px;font-weight:800
-    }
-    .why-btn{background:#fff;color:#7f1d1d}
-    .next-btn{background:#fff;color:#064e3b}
-    .new-hand-btn{background:#bae6fd !important;color:#0c4a6e !important}
 
-    .stats{
-      display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px
+    .status-row{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:9px;
+      margin:8px 0 10px;
     }
+
+    .status-box{
+      min-height:128px;
+      background:var(--panel2);
+      border:1px solid var(--line);
+      border-radius:15px;
+      padding:13px;
+    }
+
+    .status-box.good{
+      background:rgba(5,70,37,.78);
+      border-color:rgba(134,239,172,.38);
+    }
+
+    .status-box.bad{
+      background:rgba(83,18,18,.80);
+      border-color:rgba(254,202,202,.35);
+    }
+
+    .outcome-title,
+    .decision-title{
+      font-size:27px;
+      font-weight:950;
+      line-height:1.05;
+      margin-bottom:8px;
+    }
+
+    .status-text{
+      font-size:18px;
+      line-height:1.35;
+      font-weight:700;
+    }
+
+    .subtext{
+      font-size:16px;
+      line-height:1.35;
+      color:rgba(255,255,255,.82);
+      margin-top:6px;
+    }
+
+    .why-btn{
+      margin-top:10px;
+      border:0;
+      border-radius:11px;
+      padding:10px 16px;
+      background:#2563eb;
+      color:white;
+      font-size:18px;
+      font-weight:900;
+    }
+
+    .stats-row{
+      display:grid;
+      grid-template-columns:1fr 1fr 58px;
+      gap:8px;
+      align-items:stretch;
+      margin-top:8px;
+    }
+
     .stat{
-      background:var(--panel);border:1px solid var(--line);border-radius:14px;
-      text-align:center;padding:10px
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:14px;
+      text-align:center;
+      padding:10px 6px;
     }
-    .stat b{display:block;font-size:28px}
-    .stat span{font-size:16px;color:var(--muted)}
-    .footer{font-size:14px;color:var(--muted);text-align:center;margin-top:14px}
+
+    .stat b{
+      display:block;
+      font-size:29px;
+      line-height:1;
+      margin-bottom:4px;
+    }
+
+    .stat span{
+      font-size:15px;
+      font-weight:800;
+      color:var(--muted);
+    }
+
+    .settings-btn{
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:var(--panel);
+      color:white;
+      font-size:28px;
+      font-weight:800;
+    }
+
+    .footer{
+      text-align:center;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.3;
+      margin-top:9px;
+    }
 
     .modal-backdrop{
-      position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;
-      align-items:flex-end;justify-content:center;z-index:20
-    }
-    .modal-backdrop.open{display:flex}
-    .modal{
-      width:100%;max-width:720px;background:#f8fafc;color:#111827;
-      border-radius:22px 22px 0 0;padding:18px 18px calc(env(safe-area-inset-bottom) + 22px)
-    }
-    .modal h2{margin:0 0 14px}
-    .setting-row{
-      display:flex;justify-content:space-between;align-items:center;
-      padding:14px 0;border-bottom:1px solid #e5e7eb
-    }
-    .switch{position:relative;width:52px;height:30px}
-    .switch input{opacity:0;width:0;height:0}
-    .slider{
-      position:absolute;inset:0;background:#cbd5e1;border-radius:999px;transition:.2s
-    }
-    .slider:before{
-      content:"";position:absolute;width:24px;height:24px;left:3px;top:3px;
-      background:white;border-radius:50%;transition:.2s;box-shadow:0 1px 4px rgba(0,0,0,.25)
-    }
-    .switch input:checked + .slider{background:#16a34a}
-    .switch input:checked + .slider:before{transform:translateX(22px)}
-    .close-btn{
-      width:100%;margin-top:18px;border:0;border-radius:13px;padding:13px;
-      background:#111827;color:white;font-size:19px;font-weight:800
+      position:fixed;
+      inset:0;
+      z-index:40;
+      display:none;
+      align-items:flex-end;
+      justify-content:center;
+      background:rgba(0,0,0,.58);
     }
 
-    @media(max-width:390px){
-      .card{width:58px;height:86px}
-      .actions button{font-size:14px;padding:0 4px}
+    .modal-backdrop.open{display:flex}
+
+    .modal{
+      width:100%;
+      max-width:760px;
+      max-height:88vh;
+      overflow:auto;
+      background:#f8fafc;
+      color:#111827;
+      border-radius:22px 22px 0 0;
+      padding:20px 18px calc(env(safe-area-inset-bottom) + 22px);
+    }
+
+    .modal h2{
+      margin:0 0 10px;
+      font-size:26px;
+    }
+
+    .setting-row{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:14px;
+      padding:15px 0;
+      border-bottom:1px solid #e5e7eb;
+    }
+
+    .setting-row strong{
+      font-size:19px;
+    }
+
+    .setting-note{
+      color:#6b7280;
+      font-size:15px;
+      line-height:1.3;
+      margin-top:4px;
+    }
+
+    .control{
+      font-size:18px;
+      padding:9px;
+      border-radius:10px;
+      border:1px solid #cbd5e1;
+      background:white;
+      color:#111827;
+    }
+
+    .name-input{
+      width:140px;
+      text-align:right;
+    }
+
+    .switch{position:relative;width:54px;height:31px;flex:0 0 auto}
+    .switch input{opacity:0;width:0;height:0}
+    .slider{
+      position:absolute;inset:0;
+      background:#cbd5e1;
+      border-radius:999px;
+      transition:.2s;
+    }
+    .slider:before{
+      content:"";
+      position:absolute;
+      width:25px;height:25px;
+      left:3px;top:3px;
+      background:white;
+      border-radius:50%;
+      transition:.2s;
+      box-shadow:0 1px 4px rgba(0,0,0,.25);
+    }
+    .switch input:checked + .slider{background:#16a34a}
+    .switch input:checked + .slider:before{transform:translateX(23px)}
+
+    .close-btn{
+      width:100%;
+      margin-top:18px;
+      border:0;
+      border-radius:13px;
+      padding:14px;
+      background:#111827;
+      color:white;
+      font-size:20px;
+      font-weight:900;
+    }
+
+    @media(max-width:430px){
+      .card{
+        width:78px;
+        height:114px;
+        font-size:28px;
+      }
+      .card .suit-big{font-size:35px}
+      .actions button{font-size:16px}
+      .status-row{grid-template-columns:1fr 1fr}
+      .outcome-title,.decision-title{font-size:24px}
+      .status-text{font-size:17px}
+      .stat b{font-size:27px}
+    }
+
+    @media(max-width:360px){
+      .card{width:72px;height:105px;font-size:25px}
+      .card .suit-big{font-size:31px}
+      .actions{gap:5px}
+      .actions button{font-size:14px;min-height:54px}
+      .status-box{padding:11px}
+      .outcome-title,.decision-title{font-size:21px}
+      .status-text{font-size:15px}
     }
   </style>
 </head>
 <body>
 <main class="app">
-  <div class="topbar">
-    <h1>Blackjack Trainer</h1>
-    <button id="settingsBtn" class="icon-btn" aria-label="Settings">⚙︎</button>
-  </div>
 
-  <section class="section">
-    <div class="label-row">
-      <div class="label">Dealer</div>
-      <div id="dealerTotal" class="total">Showing: —</div>
-    </div>
+  <section class="section dealer-section">
+    <div class="label">DEALER</div>
     <div id="dealerCards" class="cards"></div>
   </section>
 
+  <div class="divider"></div>
+
   <section class="section">
-    <div class="label-row">
-      <div id="playerLabel" class="label">YOU</div>
-      <div id="playerTotal" class="total">Total: —</div>
-    </div>
+    <div id="playerLabel" class="label">YOU</div>
     <div id="handStrip" class="hand-strip" style="display:none"></div>
     <div id="playerCards" class="cards"></div>
   </section>
 
   <div class="actions">
-    <button id="hitBtn">Hit</button>
-    <button id="standBtn">Stand</button>
-    <button id="splitBtn">Split</button>
-    <button id="doubleBtn">Double</button>
-    <button id="newHandBtn" class="new-hand-btn">New Hand</button>
+    <button id="hitBtn">HIT</button>
+    <button id="standBtn">STAND</button>
+    <button id="splitBtn">SPLIT</button>
+    <button id="doubleBtn">DOUBLE</button>
+    <button id="newHandBtn">NEW HAND</button>
   </div>
 
-  <section id="feedback" class="feedback">
-    <div class="feedback-title">Ready</div>
-    <div class="feedback-text">Tap New Hand to begin.</div>
-    <div id="feedbackActions" class="feedback-actions"></div>
-  </section>
+  <div class="status-row">
+    <section id="outcomeBox" class="status-box">
+      <div id="outcomeTitle" class="outcome-title">READY</div>
+      <div id="outcomeText" class="status-text">Start a new hand.</div>
+    </section>
 
-  <div class="stats">
-    <div class="stat"><b id="streak">0</b><span>Current streak</span></div>
-    <div class="stat"><b id="accuracy">—</b><span>Correct this session</span></div>
+    <section id="decisionBox" class="status-box">
+      <div id="decisionTitle" class="decision-title">TRAINER</div>
+      <div id="decisionText" class="status-text">Your decision feedback will stay here.</div>
+      <div id="decisionExtra" class="subtext"></div>
+      <div id="whyContainer"></div>
+    </section>
   </div>
 
-  <div class="footer">Session stats reset when the page/app is fully restarted.</div>
+  <div class="stats-row">
+    <div class="stat">
+      <b id="streak">0</b>
+      <span>CURRENT STREAK</span>
+    </div>
+    <div class="stat">
+      <b id="accuracy">—</b>
+      <span>CORRECT THIS SESSION</span>
+    </div>
+    <button id="settingsBtn" class="settings-btn" aria-label="Settings">⚙︎</button>
+  </div>
+
+  <div class="footer">No natural blackjacks are dealt in training mode.</div>
 </main>
 
 <div id="settingsModal" class="modal-backdrop" role="dialog" aria-modal="true">
@@ -200,8 +470,16 @@
 
     <div class="setting-row">
       <div>
+        <strong>Player Name</strong>
+        <div class="setting-note">Label shown above your cards.</div>
+      </div>
+      <input id="playerNameSetting" class="control name-input" type="text" maxlength="20" value="YOU" />
+    </div>
+
+    <div class="setting-row">
+      <div>
         <strong>Allow Split</strong>
-        <div style="font-size:15px;color:#6b7280;margin-top:3px">Show and score split decisions.</div>
+        <div class="setting-note">Show and score split decisions.</div>
       </div>
       <label class="switch">
         <input id="splitSetting" type="checkbox" checked />
@@ -212,7 +490,7 @@
     <div class="setting-row">
       <div>
         <strong>Allow Double</strong>
-        <div style="font-size:15px;color:#6b7280;margin-top:3px">Show and score double-down decisions.</div>
+        <div class="setting-note">Show and score double decisions.</div>
       </div>
       <label class="switch">
         <input id="doubleSetting" type="checkbox" checked />
@@ -222,19 +500,10 @@
 
     <div class="setting-row">
       <div>
-        <strong>Player Name</strong>
-        <div style="font-size:15px;color:#6b7280;margin-top:3px">Change the label shown above your cards.</div>
-      </div>
-      <input id="playerNameSetting" type="text" maxlength="20" value="YOU"
-        style="width:130px;font-size:18px;padding:9px 10px;border-radius:10px;border:1px solid #cbd5e1;background:white;color:#111827;text-align:right" />
-    </div>
-
-    <div class="setting-row">
-      <div>
         <strong>Background</strong>
-        <div style="font-size:15px;color:#6b7280;margin-top:3px">Choose the table background.</div>
+        <div class="setting-note">Choose the table background.</div>
       </div>
-      <select id="backgroundSetting" style="font-size:18px;padding:9px;border-radius:10px;border:1px solid #cbd5e1;background:white">
+      <select id="backgroundSetting" class="control">
         <option value="green">Green</option>
         <option value="black">Black</option>
       </select>
@@ -243,7 +512,7 @@
     <div class="setting-row">
       <div>
         <strong>Dealer hits soft 17</strong>
-        <div style="font-size:15px;color:#6b7280;margin-top:3px">On by default.</div>
+        <div class="setting-note">Enabled by default.</div>
       </div>
       <label class="switch">
         <input id="soft17Setting" type="checkbox" checked />
@@ -254,9 +523,9 @@
     <div class="setting-row">
       <div>
         <strong>Dealer Card Delay</strong>
-        <div style="font-size:15px;color:#6b7280;margin-top:3px">Delay between dealer cards.</div>
+        <div class="setting-note">Delay before each dealer draw after the hole card.</div>
       </div>
-      <select id="dealerDelaySetting" style="font-size:18px;padding:9px;border-radius:10px;border:1px solid #cbd5e1;background:white">
+      <select id="dealerDelaySetting" class="control">
         <option value="500">0.5 sec</option>
         <option value="1000">1.0 sec</option>
         <option value="1500">1.5 sec</option>
@@ -266,7 +535,7 @@
       </select>
     </div>
 
-    <button id="closeSettingsBtn" class="close-btn">Done</button>
+    <button id="closeSettingsBtn" class="close-btn">DONE</button>
   </div>
 </div>
 
@@ -280,96 +549,135 @@ let dealer=[];
 let hands=[];
 let activeHandIndex=0;
 let handInProgress=false;
-let decisionOpen=false;
-let lastExplanation="";
-let settings={allowSplit:true,allowDouble:true,dealerDelay:2000,background:"green",hitSoft17:true,playerName:"YOU"};
-let stats={correct:0,attempts:0,streak:0};
 let dealerAnimating=false;
+let stats={correct:0,attempts:0,streak:0};
+
+let settings={
+  allowSplit:true,
+  allowDouble:true,
+  background:"green",
+  hitSoft17:true,
+  dealerDelay:2000,
+  playerName:"YOU"
+};
+
+let persistentDecision={
+  title:"TRAINER",
+  text:"Your decision feedback will stay here.",
+  extra:"",
+  type:"",
+  why:""
+};
 
 function buildDeck(){
   deck=[];
   for(let d=0;d<6;d++){
     for(const s of suits){
-      for(const r of ranks) deck.push({r,s});
+      for(const r of ranks){
+        deck.push({r,s});
+      }
     }
   }
   shuffle(deck);
 }
+
 function shuffle(a){
   for(let i=a.length-1;i>0;i--){
     const j=Math.floor(Math.random()*(i+1));
     [a[i],a[j]]=[a[j],a[i]];
   }
 }
+
 function draw(){
   if(deck.length<70) buildDeck();
   return deck.pop();
 }
+
 function cardValue(c){
   if(c.r==="A") return 11;
   if(["K","Q","J"].includes(c.r)) return 10;
   return Number(c.r);
 }
+
 function handValue(cards){
   let total=0,aces=0;
   for(const c of cards){
-    if(c.r==="A"){total+=11;aces++;}
-    else total+=cardValue(c);
+    if(c.r==="A"){
+      total+=11;
+      aces++;
+    }else{
+      total+=cardValue(c);
+    }
   }
-  while(total>21&&aces>0){total-=10;aces--;}
-  const raw=cards.reduce((sum,c)=>sum+cardValue(c),0);
-  return {total,soft:cards.some(c=>c.r==="A")&&raw===total};
+  while(total>21&&aces>0){
+    total-=10;
+    aces--;
+  }
+
+  let soft=false;
+  if(cards.some(c=>c.r==="A")){
+    let alt=0;
+    for(const c of cards){
+      alt += c.r==="A" ? 11 : cardValue(c);
+    }
+    soft = alt===total;
+  }
+
+  return {total,soft};
 }
+
 function isNatural(cards){
   return cards.length===2 && handValue(cards).total===21;
 }
+
 function renderCard(c,hidden=false){
   const red=c.s==="♥"||c.s==="♦";
   return `<div class="card ${red?"red":""} ${hidden?"hidden":""}">
-    <span>${c.r}${c.s}</span><span style="align-self:flex-end">${c.s}</span>
+    <div class="corner"><span>${c.r}</span><span>${c.s}</span></div>
+    <div class="suit-big">${c.s}</div>
   </div>`;
 }
+
 function activeHand(){
-  return hands[activeHandIndex] || null;
+  return hands[activeHandIndex]||null;
 }
+
 function pairValue(cards){
   if(cards.length!==2) return null;
-  const a=cardValue(cards[0]),b=cardValue(cards[1]);
+  const a=cardValue(cards[0]);
+  const b=cardValue(cards[1]);
   return a===b?a:null;
 }
+
 function canSplit(hand){
-  return settings.allowSplit && !hand.finished && hand.cards.length===2 &&
-    cardValue(hand.cards[0])===cardValue(hand.cards[1]) && hands.length<4;
-}
-function canDouble(hand){
-  return settings.allowDouble && !hand.finished && hand.cards.length===2;
+  return settings.allowSplit &&
+    hand &&
+    !hand.finished &&
+    hand.cards.length===2 &&
+    cardValue(hand.cards[0])===cardValue(hand.cards[1]) &&
+    hands.length<4;
 }
 
-function render(revealDealer=false,dealerVisibleCount=null){
-  const visibleCount=dealerVisibleCount===null?dealer.length:dealerVisibleCount;
-  $("dealerCards").innerHTML=dealer.map((c,i)=>{
-    if(i>=visibleCount) return "";
-    return renderCard(c,!revealDealer&&i===1);
-  }).join("");
-  $("dealerTotal").textContent=dealer.length&&visibleCount>0
-    ? (revealDealer?`Total: ${handValue(dealer).total}`:`Showing: ${cardValue(dealer[0])}`)
-    : "Showing: —";
+function canDouble(hand){
+  return settings.allowDouble &&
+    hand &&
+    !hand.finished &&
+    hand.cards.length===2;
+}
+
+function render(revealDealer=false){
+  $("dealerCards").innerHTML=dealer.map((c,i)=>renderCard(c,!revealDealer&&i===1)).join("");
 
   const hand=activeHand();
-  if(hand){
-    $("playerCards").innerHTML=hand.cards.map(c=>renderCard(c)).join("");
-    const v=handValue(hand.cards);
-    $("playerTotal").textContent=`Total: ${v.total}${v.soft?" (soft)":""}`;
-  }else{
-    $("playerCards").innerHTML="";
-    $("playerTotal").textContent="Total: —";
-  }
+  $("playerCards").innerHTML=hand ? hand.cards.map(c=>renderCard(c)).join("") : "";
 
   if(hands.length>1){
     $("handStrip").style.display="flex";
     $("handStrip").innerHTML=hands.map((h,i)=>{
-      const v=handValue(h.cards).total;
-      return `<div class="hand-chip ${i===activeHandIndex?"active":""}">Hand ${i+1}: ${v}${h.finished?" ✓":""}</div>`;
+      const t=handValue(h.cards).total;
+      return `<div class="hand-chip ${i===activeHandIndex?"active":""}">
+        Hand ${i+1}: ${t}${h.finished?" ✓":""}
+      </div>`;
     }).join("");
   }else{
     $("handStrip").style.display="none";
@@ -381,21 +689,43 @@ function render(revealDealer=false,dealerVisibleCount=null){
   $("standBtn").disabled=!enabled;
   $("splitBtn").disabled=!enabled || !canSplit(hand);
   $("doubleBtn").disabled=!enabled || !canDouble(hand);
+  $("newHandBtn").disabled=dealerAnimating;
 
-  $("splitBtn").style.display=settings.allowSplit?"block":"none";
-  $("doubleBtn").style.display=settings.allowDouble?"block":"none";
+  $("splitBtn").classList.toggle("slot-hidden",!settings.allowSplit);
+  $("doubleBtn").classList.toggle("slot-hidden",!settings.allowDouble);
 }
 
-function setFeedback(title,text,type="",showWhy=false){
-  const box=$("feedback");
-  box.className=`feedback ${type}`;
-  box.innerHTML=`<div class="feedback-title">${title}</div>
-    <div class="feedback-text">${text}</div>
-    <div id="feedbackActions" class="feedback-actions"></div>`;
-  if(showWhy){
-    $("feedbackActions").innerHTML=`<button id="whyBtn" class="why-btn">Why?</button>`;
-    $("whyBtn").onclick=()=>setFeedback("Why?",lastExplanation,"bad",false);
+function renderDecisionBox(){
+  const box=$("decisionBox");
+  box.className=`status-box ${persistentDecision.type}`;
+  $("decisionTitle").textContent=persistentDecision.title;
+  $("decisionText").textContent=persistentDecision.text;
+  $("decisionExtra").textContent=persistentDecision.extra || "";
+  $("whyContainer").innerHTML="";
+
+  if(persistentDecision.why){
+    const btn=document.createElement("button");
+    btn.className="why-btn";
+    btn.textContent="WHY?";
+    btn.onclick=()=>{
+      persistentDecision.extra=persistentDecision.why;
+      persistentDecision.why="";
+      renderDecisionBox();
+    };
+    $("whyContainer").appendChild(btn);
   }
+}
+
+function setDecisionFeedback(title,text,type="",why=""){
+  persistentDecision={title,text,extra:"",type,why};
+  renderDecisionBox();
+}
+
+function setOutcome(title,text,type=""){
+  const box=$("outcomeBox");
+  box.className=`status-box ${type}`;
+  $("outcomeTitle").textContent=title;
+  $("outcomeText").textContent=text;
 }
 
 function updateStats(){
@@ -410,118 +740,155 @@ function strategyFor(cards,up){
   const pair=pairValue(cards);
 
   if(settings.allowSplit && pair!==null){
-    if(pair===11 || pair===8) return {action:"split",why:"This pair is stronger as two separate starting hands than as one combined hand."};
-    if(pair===10) return {action:"stand",why:"A total of 20 is already very strong, so splitting tens gives up too much value."};
+    if(pair===11 || pair===8){
+      return {action:"split",why:"Splitting aces or eights produces stronger expected hands than playing them together."};
+    }
+    if(pair===10){
+      return {action:"stand",why:"Twenty is already extremely strong, so splitting tens gives up too much value."};
+    }
     if(pair===9){
-      if([2,3,4,5,6,8,9].includes(up)) return {action:"split",why:"Splitting 9s is preferred against these dealer cards because each 9 has good potential to build a strong hand."};
-      return {action:"stand",why:"Against 7, 10-value cards, or Ace, keeping 18 is better than splitting."};
+      if([2,3,4,5,6,8,9].includes(up)){
+        return {action:"split",why:"Against these dealer cards, two starting nines are more valuable than keeping 18 together."};
+      }
+      return {action:"stand",why:"Against 7, 10, or Ace, keeping 18 is better than splitting the nines."};
     }
     if(pair===7){
-      if(up<=7) return {action:"split",why:"Against a weaker dealer up-card, splitting 7s gives two chances to build strong totals."};
-      return {action:"hit",why:"Against a strong dealer card, splitting 7s is too aggressive; hitting is preferred."};
+      if(up<=7){
+        return {action:"split",why:"Against dealer 2 through 7, splitting sevens gives two better chances to build useful hands."};
+      }
+      return {action:"hit",why:"Against a strong dealer card, hitting the 14 is better than splitting sevens."};
     }
     if(pair===6){
-      if(up<=6) return {action:"split",why:"Against dealer 2–6, the dealer is vulnerable to busting, making two starting 6s more valuable than a hard 12."};
-      return {action:"hit",why:"Against a strong dealer card, hard 12 is weak and splitting does not help enough."};
+      if(up<=6){
+        return {action:"split",why:"Dealer 2 through 6 is vulnerable, so splitting sixes is stronger than keeping hard 12."};
+      }
+      return {action:"hit",why:"Against dealer 7 through Ace, hard 12 should be improved rather than split."};
     }
     if(pair===5){
-      if(settings.allowDouble && up<=9) return {action:"double",why:"A pair of 5s is really a strong hard 10. Doubling is better than splitting them."};
-      return {action:"hit",why:"Without a favourable double, treat the pair as hard 10 rather than splitting it."};
+      if(settings.allowDouble && up<=9){
+        return {action:"double",why:"Two fives make a strong hard 10. Doubling is better than splitting them."};
+      }
+      return {action:"hit",why:"Treat two fives as hard 10. If doubling is unavailable or unattractive, hit instead of splitting."};
     }
     if(pair===4){
-      if([5,6].includes(up)) return {action:"split",why:"Against dealer 5 or 6, splitting 4s creates two hands that can profit from the dealer's weak position."};
-      return {action:"hit",why:"Outside dealer 5 or 6, splitting 4s is not valuable enough."};
+      if([5,6].includes(up)){
+        return {action:"split",why:"Dealer 5 or 6 is weak enough that splitting fours is worthwhile."};
+      }
+      return {action:"hit",why:"Outside dealer 5 or 6, splitting fours is not valuable enough."};
     }
     if(pair===2 || pair===3){
-      if(up<=7) return {action:"split",why:"Against dealer 2–7, two separate low cards have better potential than one weak combined total."};
-      return {action:"hit",why:"Against stronger dealer cards, hitting is safer than splitting small pairs."};
+      if(up<=7){
+        return {action:"split",why:"Against dealer 2 through 7, splitting small pairs creates better starting opportunities."};
+      }
+      return {action:"hit",why:"Against stronger dealer cards, hitting is better than splitting small pairs."};
     }
   }
 
-  if(v.soft && cards.length===2){
+  if(v.soft){
     const t=v.total;
-    if(t>=19) return {action:"stand",why:"Soft 19 or better is already strong enough to stand."};
+
+    if(t>=19){
+      return {action:"stand",why:"Soft 19 or better is already strong enough to stand."};
+    }
 
     if(t===18){
-      if(settings.allowDouble && up>=3&&up<=6) return {action:"double",why:"Soft 18 is strong enough to press the advantage against dealer 3–6."};
-      if([2,7,8].includes(up)) return {action:"stand",why:"Soft 18 is good enough to stand against dealer 2, 7, or 8."};
+      if(settings.allowDouble && up>=3 && up<=6){
+        return {action:"double",why:"Soft 18 is strong enough to double against dealer 3 through 6."};
+      }
+      if([2,7,8].includes(up)){
+        return {action:"stand",why:"Soft 18 is good enough to stand against dealer 2, 7, or 8."};
+      }
       return {action:"hit",why:"Against dealer 9, 10, or Ace, soft 18 is not strong enough to stand."};
     }
+
     if(t===17){
-      if(settings.allowDouble && up>=3&&up<=6) return {action:"double",why:"Soft 17 can improve safely, and dealer 3–6 is weak enough to justify doubling."};
-      return {action:"hit",why:"Soft 17 is too weak to stand, and without a favourable double you should hit."};
+      if(settings.allowDouble && up>=3 && up<=6){
+        return {action:"double",why:"Soft 17 can improve safely and dealer 3 through 6 is weak enough to double against."};
+      }
+      return {action:"hit",why:"Soft 17 is too weak to stand."};
     }
-    if(t===16||t===15){
-      if(settings.allowDouble && up>=4&&up<=6) return {action:"double",why:"These soft totals can improve safely and dealer 4–6 is vulnerable."};
-      return {action:"hit",why:"The hand is too weak to stand; hit unless the dealer's weakness justifies doubling."};
+
+    if(t===16 || t===15){
+      if(settings.allowDouble && up>=4 && up<=6){
+        return {action:"double",why:"This soft hand can improve safely, and dealer 4 through 6 is weak enough to double against."};
+      }
+      return {action:"hit",why:"This soft total is too weak to stand."};
     }
-    if(t===14||t===13){
-      if(settings.allowDouble && up>=5&&up<=6) return {action:"double",why:"Very soft totals can still improve safely, and dealer 5–6 is weak enough to double against."};
+
+    if(t===14 || t===13){
+      if(settings.allowDouble && up>=5 && up<=6){
+        return {action:"double",why:"Against dealer 5 or 6, this soft hand has enough upside to double."};
+      }
       return {action:"hit",why:"This soft total is too weak to stand."};
     }
   }
 
   const t=v.total;
-  if(t>=17) return {action:"stand",why:"Hard 17 or more is usually strong enough to stand; hitting risks busting too often."};
-  if(t>=13&&t<=16){
-    if(up>=2&&up<=6) return {action:"stand",why:"Dealer 2–6 is the vulnerable range. With a stiff hand, standing lets the dealer take the bust risk."};
-    return {action:"hit",why:"Against dealer 7 through Ace, your total is usually too weak to stand."};
+
+  if(t>=17){
+    return {action:"stand",why:"Hard 17 or more is strong enough to stand; hitting risks busting too often."};
   }
+
+  if(t>=13 && t<=16){
+    if(up>=2 && up<=6){
+      return {action:"stand",why:"Dealer 2 through 6 is vulnerable. Standing lets the dealer take the bust risk."};
+    }
+    return {action:"hit",why:"Against dealer 7 through Ace, this stiff total is usually too weak to stand."};
+  }
+
   if(t===12){
-    if(up>=4&&up<=6) return {action:"stand",why:"Dealer 4–6 is weak enough that standing on 12 is better than taking the bust risk."};
+    if(up>=4 && up<=6){
+      return {action:"stand",why:"Dealer 4 through 6 is weak enough that standing on 12 beats taking the bust risk."};
+    }
     return {action:"hit",why:"Against dealer 2, 3, or 7 through Ace, 12 is too weak to stand."};
   }
+
   if(t===11){
-    if(settings.allowDouble && up!==11) return {action:"double",why:"Hard 11 is one of the strongest doubling hands because many cards produce a strong total."};
-    return {action:"hit",why:"Hard 11 should be hit when doubling is unavailable or not preferred against the dealer Ace in this trainer."};
+    if(settings.allowDouble && up!==11){
+      return {action:"double",why:"Hard 11 is one of the strongest doubling hands because many draws create a strong total."};
+    }
+    return {action:"hit",why:"Hit hard 11 when doubling is unavailable or not preferred against the dealer Ace in this trainer."};
   }
+
   if(t===10){
-    if(settings.allowDouble && up<=9) return {action:"double",why:"Hard 10 has strong improvement potential against dealer 2–9."};
-    return {action:"hit",why:"Against dealer 10 or Ace, the dealer is too strong to justify doubling 10."};
+    if(settings.allowDouble && up<=9){
+      return {action:"double",why:"Hard 10 has strong improvement potential against dealer 2 through 9."};
+    }
+    return {action:"hit",why:"Against dealer 10 or Ace, hitting is safer than doubling hard 10."};
   }
+
   if(t===9){
-    if(settings.allowDouble && up>=3&&up<=6) return {action:"double",why:"Hard 9 can be doubled profitably against the dealer's weakest up-cards."};
-    return {action:"hit",why:"Hard 9 is too weak to stand and should only be doubled against dealer 3–6."};
+    if(settings.allowDouble && up>=3 && up<=6){
+      return {action:"double",why:"Hard 9 can be doubled profitably against dealer 3 through 6."};
+    }
+    return {action:"hit",why:"Hard 9 is too weak to stand and should only be doubled against dealer 3 through 6."};
   }
+
   return {action:"hit",why:"This total is too low to stand, so hitting is the best way to improve it."};
 }
 
 function scoreDecision(action){
-  if(!decisionOpen) return;
   const hand=activeHand();
+  if(!hand || hand.finished || dealerAnimating) return;
+
   const best=strategyFor(hand.cards,cardValue(dealer[0]));
   stats.attempts++;
 
   if(action===best.action){
     stats.correct++;
     stats.streak++;
-    setFeedback("Correct",`${action[0].toUpperCase()+action.slice(1)} is the right play here.`,"good");
+    setDecisionFeedback("CORRECT!",`${action.toUpperCase()} is the right play.`,"good","");
   }else{
     stats.streak=0;
-    lastExplanation=best.why;
-    setFeedback("Not quite",`You chose ${action.toUpperCase()}. The better play is ${best.action.toUpperCase()}.`,"bad",true);
+    setDecisionFeedback(
+      "NOT QUITE",
+      `You chose ${action.toUpperCase()}. Better play: ${best.action.toUpperCase()}.`,
+      "bad",
+      best.why
+    );
   }
+
   updateStats();
-  decisionOpen=false;
-}
-
-function openNextDecision(){
-  const hand=activeHand();
-  if(!hand || hand.finished) return;
-  decisionOpen=true;
-}
-
-function nextPlayableHand(){
-  for(let i=activeHandIndex+1;i<hands.length;i++){
-    if(!hands[i].finished){
-      activeHandIndex=i;
-      decisionOpen=true;
-      render(false);
-      setFeedback(`Hand ${i+1}`,"Choose the best play for this hand.");
-      return;
-    }
-  }
-  finishRound();
 }
 
 function sleep(ms){
@@ -530,24 +897,23 @@ function sleep(ms){
 
 async function dealerPlayAnimated(){
   dealerAnimating=true;
-  render(true,2);
+  render(true);
 
   while(true){
     const v=handValue(dealer);
-    const shouldHit = v.total<17 || (v.total===17 && v.soft && settings.hitSoft17);
+    const shouldHit=v.total<17 || (v.total===17 && v.soft && settings.hitSoft17);
     if(!shouldHit) break;
 
     await sleep(settings.dealerDelay);
     dealer.push(draw());
-    render(true,dealer.length);
+    render(true);
   }
 
   dealerAnimating=false;
 }
+
 async function finishRound(){
   handInProgress=false;
-  decisionOpen=false;
-
   await dealerPlayAnimated();
   render(true);
 
@@ -557,57 +923,87 @@ async function finishRound(){
     const p=handValue(hands[0].cards).total;
 
     if(p>21){
-      setFeedback("LOSS!",`You bust (${p})`,"bad");
+      setOutcome("LOSS!",`You bust (${p})`,"bad");
     }else if(dealerTotal>21){
-      setFeedback("WIN!",`Dealer bust (${dealerTotal})`,"good");
+      setOutcome("WIN!",`Dealer bust (${dealerTotal})`,"good");
     }else if(p>dealerTotal){
-      setFeedback("WIN!",`You win ${p} to ${dealerTotal}`,"good");
+      setOutcome("WIN!",`You win ${p} to ${dealerTotal}`,"good");
     }else if(p<dealerTotal){
-      setFeedback("LOSS!",`Dealer wins ${dealerTotal} to ${p}`,"bad");
+      setOutcome("LOSS!",`Dealer wins ${dealerTotal} to ${p}`,"bad");
     }else{
-      setFeedback("PUSH",`You both have ${p}`);
+      setOutcome("PUSH",`You both have ${p}`,"");
     }
     return;
   }
 
-  const results=hands.map((h,i)=>{
+  let wins=0,losses=0,pushes=0;
+  const pieces=[];
+
+  hands.forEach((h,i)=>{
     const p=handValue(h.cards).total;
-    if(p>21) return `Hand ${i+1}: loss — you bust (${p})`;
-    if(dealerTotal>21) return `Hand ${i+1}: win — dealer bust (${dealerTotal})`;
-    if(p>dealerTotal) return `Hand ${i+1}: win ${p} to ${dealerTotal}`;
-    if(p<dealerTotal) return `Hand ${i+1}: loss ${dealerTotal} to ${p}`;
-    return `Hand ${i+1}: push at ${p}`;
+    if(p>21){
+      losses++;
+      pieces.push(`H${i+1}: bust ${p}`);
+    }else if(dealerTotal>21){
+      wins++;
+      pieces.push(`H${i+1}: win`);
+    }else if(p>dealerTotal){
+      wins++;
+      pieces.push(`H${i+1}: win ${p}-${dealerTotal}`);
+    }else if(p<dealerTotal){
+      losses++;
+      pieces.push(`H${i+1}: loss ${dealerTotal}-${p}`);
+    }else{
+      pushes++;
+      pieces.push(`H${i+1}: push ${p}`);
+    }
   });
-  setFeedback("ROUND COMPLETE",results.join(" • "));
+
+  const title = wins>losses ? "WIN!" : losses>wins ? "LOSS!" : "PUSH";
+  const type = wins>losses ? "good" : losses>wins ? "bad" : "";
+  setOutcome(title,pieces.join(" • "),type);
 }
-function stand(){
-  if(!handInProgress) return;
-  scoreDecision("stand");
+
+function nextPlayableHand(){
+  for(let i=activeHandIndex+1;i<hands.length;i++){
+    if(!hands[i].finished){
+      activeHandIndex=i;
+      render(false);
+      return;
+    }
+  }
+  finishRound();
+}
+
+function hit(){
+  if(!handInProgress || dealerAnimating) return;
   const hand=activeHand();
+  if(!hand || hand.finished) return;
+
+  scoreDecision("hit");
+  hand.cards.push(draw());
+  render(false);
+
+  const total=handValue(hand.cards).total;
+  if(total>=21){
+    hand.finished=true;
+    nextPlayableHand();
+  }
+}
+
+function stand(){
+  if(!handInProgress || dealerAnimating) return;
+  const hand=activeHand();
+  if(!hand || hand.finished) return;
+
+  scoreDecision("stand");
   hand.finished=true;
   render(false);
   nextPlayableHand();
 }
 
-function hit(){
-  if(!handInProgress) return;
-  scoreDecision("hit");
-  const hand=activeHand();
-  hand.cards.push(draw());
-  const v=handValue(hand.cards).total;
-  render(false);
-
-  if(v>=21){
-    hand.finished=true;
-    if(v>21) setFeedback("Bust",`Hand ${activeHandIndex+1} finishes with ${v}.`);
-    nextPlayableHand();
-  }else{
-    decisionOpen=true;
-  }
-}
-
 function doubleDown(){
-  if(!handInProgress) return;
+  if(!handInProgress || dealerAnimating) return;
   const hand=activeHand();
   if(!canDouble(hand)) return;
 
@@ -620,7 +1016,7 @@ function doubleDown(){
 }
 
 function splitHand(){
-  if(!handInProgress) return;
+  if(!handInProgress || dealerAnimating) return;
   const hand=activeHand();
   if(!canSplit(hand)) return;
 
@@ -629,24 +1025,24 @@ function splitHand(){
   const first=hand.cards[0];
   const second=hand.cards[1];
 
-  hands.splice(activeHandIndex,1,
+  hands.splice(
+    activeHandIndex,
+    1,
     {cards:[first,draw()],finished:false,doubled:false},
     {cards:[second,draw()],finished:false,doubled:false}
   );
 
-  // Avoid natural 21 immediately after a split as well, to keep every hand trainable.
   for(const h of [hands[activeHandIndex],hands[activeHandIndex+1]]){
-    while(isNatural(h.cards)) h.cards[1]=draw();
+    while(isNatural(h.cards)){
+      h.cards[1]=draw();
+    }
   }
 
-  decisionOpen=true;
   render(false);
-  setFeedback(`Hand ${activeHandIndex+1}`,"Split complete. Play the first hand.");
 }
 
 function dealTrainableRound(){
   let p,d;
-
   do{
     p=[draw(),draw()];
     d=[draw(),draw()];
@@ -655,7 +1051,7 @@ function dealTrainableRound(){
   return {p,d};
 }
 
-async function newHand(){
+function newHand(){
   if(dealerAnimating) return;
 
   const dealt=dealTrainableRound();
@@ -663,22 +1059,37 @@ async function newHand(){
   hands=[{cards:dealt.p,finished:false,doubled:false}];
   activeHandIndex=0;
   handInProgress=true;
-  decisionOpen=true;
-  dealerAnimating=false;
 
-  setFeedback("Your decision",`Dealer shows ${dealer[0].r}${dealer[0].s}. Choose the best play.`);
-  render(false,2);
+  setOutcome("PLAY", "Finish the hand.", "");
+  persistentDecision={
+    title:"YOUR DECISION",
+    text:"Choose the best play.",
+    extra:"",
+    type:"",
+    why:""
+  };
+  renderDecisionBox();
+  render(false);
 }
+
 $("hitBtn").onclick=hit;
 $("standBtn").onclick=stand;
 $("splitBtn").onclick=splitHand;
 $("doubleBtn").onclick=doubleDown;
 $("newHandBtn").onclick=newHand;
 
-$("settingsBtn").onclick=()=>$("settingsModal").classList.add("open");
-$("closeSettingsBtn").onclick=()=>$("settingsModal").classList.remove("open");
+$("settingsBtn").onclick=()=>{
+  $("settingsModal").classList.add("open");
+};
+
+$("closeSettingsBtn").onclick=()=>{
+  $("settingsModal").classList.remove("open");
+};
+
 $("settingsModal").onclick=e=>{
-  if(e.target===$("settingsModal")) $("settingsModal").classList.remove("open");
+  if(e.target===$("settingsModal")){
+    $("settingsModal").classList.remove("open");
+  }
 };
 
 $("splitSetting").onchange=e=>{
@@ -686,22 +1097,11 @@ $("splitSetting").onchange=e=>{
   localStorage.setItem("bjAllowSplit",settings.allowSplit?"1":"0");
   render(false);
 };
+
 $("doubleSetting").onchange=e=>{
   settings.allowDouble=e.target.checked;
   localStorage.setItem("bjAllowDouble",settings.allowDouble?"1":"0");
   render(false);
-};
-
-$("dealerDelaySetting").onchange=e=>{
-  settings.dealerDelay=Number(e.target.value);
-  localStorage.setItem("bjDealerDelay",String(settings.dealerDelay));
-};
-
-$("playerNameSetting").oninput=e=>{
-  const cleaned=e.target.value.trim().slice(0,20);
-  settings.playerName=cleaned || "YOU";
-  localStorage.setItem("bjPlayerName",settings.playerName);
-  $("playerLabel").textContent=settings.playerName;
 };
 
 $("backgroundSetting").onchange=e=>{
@@ -715,24 +1115,37 @@ $("soft17Setting").onchange=e=>{
   localStorage.setItem("bjHitSoft17",settings.hitSoft17?"1":"0");
 };
 
+$("dealerDelaySetting").onchange=e=>{
+  settings.dealerDelay=Number(e.target.value);
+  localStorage.setItem("bjDealerDelay",String(settings.dealerDelay));
+};
+
+$("playerNameSetting").oninput=e=>{
+  settings.playerName=(e.target.value.trim().slice(0,20) || "YOU");
+  localStorage.setItem("bjPlayerName",settings.playerName);
+  $("playerLabel").textContent=settings.playerName;
+};
+
 settings.allowSplit=localStorage.getItem("bjAllowSplit")!=="0";
 settings.allowDouble=localStorage.getItem("bjAllowDouble")!=="0";
-settings.dealerDelay=Number(localStorage.getItem("bjDealerDelay")||"2000");
 settings.background=localStorage.getItem("bjBackground")||"green";
 settings.hitSoft17=localStorage.getItem("bjHitSoft17")!=="0";
+settings.dealerDelay=Number(localStorage.getItem("bjDealerDelay")||"2000");
 settings.playerName=localStorage.getItem("bjPlayerName")||"YOU";
 
 $("splitSetting").checked=settings.allowSplit;
 $("doubleSetting").checked=settings.allowDouble;
-$("dealerDelaySetting").value=String(settings.dealerDelay);
 $("backgroundSetting").value=settings.background;
 $("soft17Setting").checked=settings.hitSoft17;
+$("dealerDelaySetting").value=String(settings.dealerDelay);
 $("playerNameSetting").value=settings.playerName;
 $("playerLabel").textContent=settings.playerName;
+
 document.body.classList.toggle("black-theme",settings.background==="black");
 
 buildDeck();
 updateStats();
+renderDecisionBox();
 render(false);
 </script>
 </body>
