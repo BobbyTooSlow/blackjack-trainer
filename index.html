@@ -95,22 +95,25 @@
       border-radius:11px;
       background:var(--card);
       color:var(--ink);
-      padding:7px 8px;
+      padding:7px 8px 8px;
       display:flex;
       flex-direction:column;
-      justify-content:space-between;
       border:1px solid rgba(0,0,0,.15);
       box-shadow:0 5px 13px rgba(0,0,0,.30);
       font-weight:900;
       font-size:29px;
       line-height:1;
+      overflow:hidden;
     }
 
     .card .corner{
       display:flex;
-      flex-direction:column;
       align-items:flex-start;
-      gap:1px;
+      justify-content:flex-start;
+      height:30px;
+      flex:0 0 30px;
+      font-size:29px;
+      line-height:1;
     }
 
     .card .suit-big{
@@ -124,31 +127,39 @@
       position:relative;
       flex:1;
       width:100%;
+      min-height:0;
       display:flex;
       align-items:center;
       justify-content:center;
-      margin-top:2px;
+      margin-top:0;
+      overflow:hidden;
     }
 
     .pip-grid{
       position:relative;
       width:100%;
       height:100%;
-      min-height:72px;
+      min-height:0;
+      overflow:hidden;
     }
 
     .pip{
       position:absolute;
       transform:translate(-50%,-50%);
-      font-size:24px;
+      font-size:19px;
       line-height:1;
       font-weight:900;
+      width:20px;
+      height:20px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
     }
 
     .face-art{
       width:100%;
       height:100%;
-      min-height:72px;
+      min-height:0;
       display:flex;
       align-items:center;
       justify-content:center;
@@ -464,6 +475,7 @@
         height:114px;
         font-size:28px;
       }
+      .pip{font-size:18px;width:19px;height:19px}
       .card .suit-big{font-size:35px}
       .actions button{font-size:16px}
       .status-row{grid-template-columns:1fr 1fr}
@@ -474,6 +486,7 @@
 
     @media(max-width:360px){
       .card{width:72px;height:105px;font-size:25px}
+      .pip{font-size:16px;width:17px;height:17px}
       .card .suit-big{font-size:31px}
       .actions{gap:5px}
       .actions button{font-size:14px;min-height:54px}
@@ -550,8 +563,8 @@
 
     <div class="setting-row">
       <div>
-        <strong>Prohibit blackjacks</strong>
-        <div class="setting-note">Redeal natural blackjacks so every hand is trainable.</div>
+        <strong>Prohibit automatic stands</strong>
+        <div class="setting-note">Redeal initial hands of 18 or higher so the opening decision is never an automatic stand.</div>
       </div>
       <label class="switch">
         <input id="blackjackSetting" type="checkbox" checked />
@@ -642,7 +655,7 @@ let settings={
   hitSoft17:true,
   dealerDelay:2000,
   playerName:"YOU",
-  prohibitBlackjacks:true
+  prohibitAutomaticStands:true
 };
 
 let persistentDecision={
@@ -716,19 +729,18 @@ function isNatural(cards){
 
 function pipPositions(rank){
   const pos={
-    "2":[[50,22],[50,78]],
-    "3":[[50,18],[50,50],[50,82]],
-    "4":[[30,24],[70,24],[30,76],[70,76]],
-    "5":[[30,22],[70,22],[50,50],[30,78],[70,78]],
-    "6":[[30,20],[70,20],[30,50],[70,50],[30,80],[70,80]],
-    "7":[[30,18],[70,18],[50,35],[30,50],[70,50],[30,82],[70,82]],
-    "8":[[30,16],[70,16],[50,31],[30,43],[70,43],[50,57],[30,84],[70,84]],
-    "9":[[30,15],[70,15],[30,34],[70,34],[50,50],[30,66],[70,66],[30,85],[70,85]],
-    "10":[[30,13],[70,13],[50,25],[30,36],[70,36],[30,64],[70,64],[50,75],[30,87],[70,87]]
+    "2":[[50,20],[50,80]],
+    "3":[[50,17],[50,50],[50,83]],
+    "4":[[28,20],[72,20],[28,80],[72,80]],
+    "5":[[28,18],[72,18],[50,50],[28,82],[72,82]],
+    "6":[[28,17],[72,17],[28,50],[72,50],[28,83],[72,83]],
+    "7":[[28,15],[72,15],[50,34],[28,50],[72,50],[28,85],[72,85]],
+    "8":[[28,14],[72,14],[50,30],[28,43],[72,43],[50,57],[28,86],[72,86]],
+    "9":[[28,13],[72,13],[28,34],[72,34],[50,50],[28,66],[72,66],[28,87],[72,87]],
+    "10":[[28,11],[72,11],[50,24],[28,36],[72,36],[28,64],[72,64],[50,76],[28,89],[72,89]]
   };
   return pos[rank]||[];
 }
-
 function renderCardFace(c){
   if(c.r==="A"){
     return `<div class="card-face"><div class="ace-center">${c.s}</div></div>`;
@@ -753,7 +765,7 @@ function renderCardFace(c){
 function renderCard(c,hidden=false){
   const red=c.s==="♥"||c.s==="♦";
   return `<div class="card ${red?"red":""} ${hidden?"hidden":""}">
-    <div class="corner"><span>${c.r}</span><span>${c.s}</span></div>
+    <div class="corner"><span>${c.r}</span></div>
     ${renderCardFace(c)}
   </div>`;
 }
@@ -1152,14 +1164,6 @@ function splitHand(){
     {cards:[second,draw()],finished:false,doubled:false}
   );
 
-  if(settings.prohibitBlackjacks){
-    for(const h of [hands[activeHandIndex],hands[activeHandIndex+1]]){
-      while(isNatural(h.cards)){
-        h.cards[1]=draw();
-      }
-    }
-  }
-
   render(false);
 }
 
@@ -1168,7 +1172,7 @@ function dealTrainableRound(){
   do{
     p=[draw(),draw()];
     d=[draw(),draw()];
-  }while(settings.prohibitBlackjacks && (isNatural(p) || isNatural(d)));
+  }while(settings.prohibitAutomaticStands && handValue(p).total>=18);
 
   return {p,d};
 }
@@ -1215,8 +1219,8 @@ $("settingsModal").onclick=e=>{
 };
 
 $("blackjackSetting").onchange=e=>{
-  settings.prohibitBlackjacks=e.target.checked;
-  localStorage.setItem("bjProhibitBlackjacks",settings.prohibitBlackjacks?"1":"0");
+  settings.prohibitAutomaticStands=e.target.checked;
+  localStorage.setItem("bjProhibitAutomaticStands",settings.prohibitAutomaticStands?"1":"0");
 };
 
 $("splitSetting").onchange=e=>{
@@ -1253,7 +1257,11 @@ $("playerNameSetting").oninput=e=>{
   $("playerLabel").textContent=settings.playerName;
 };
 
-settings.prohibitBlackjacks=localStorage.getItem("bjProhibitBlackjacks")!=="0";
+const savedAutoStand=localStorage.getItem("bjProhibitAutomaticStands");
+const legacyBlackjack=localStorage.getItem("bjProhibitBlackjacks");
+settings.prohibitAutomaticStands=savedAutoStand!==null
+  ? savedAutoStand!=="0"
+  : legacyBlackjack!=="0";
 settings.allowSplit=localStorage.getItem("bjAllowSplit")!=="0";
 settings.allowDouble=localStorage.getItem("bjAllowDouble")!=="0";
 settings.background=localStorage.getItem("bjBackground")||"black";
@@ -1261,7 +1269,7 @@ settings.hitSoft17=localStorage.getItem("bjHitSoft17")!=="0";
 settings.dealerDelay=Number(localStorage.getItem("bjDealerDelay")||"2000");
 settings.playerName=localStorage.getItem("bjPlayerName")||"YOU";
 
-$("blackjackSetting").checked=settings.prohibitBlackjacks;
+$("blackjackSetting").checked=settings.prohibitAutomaticStands;
 $("splitSetting").checked=settings.allowSplit;
 $("doubleSetting").checked=settings.allowDouble;
 $("backgroundSetting").value=settings.background;
