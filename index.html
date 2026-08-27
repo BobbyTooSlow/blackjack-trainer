@@ -3,174 +3,615 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#0b1220" />
+  <meta name="theme-color" content="#0f6b3b" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>Blackjack Trainer</title>
   <style>
     :root{
-      --bg:#0b1220; --panel:#111827; --panel2:#172033; --text:#f8fafc;
-      --muted:#9ca3af; --line:#263247; --good:#22c55e; --card:#fff; --ink:#111827;
+      --felt:#0f6b3b;
+      --felt-dark:#0b4d2b;
+      --panel:rgba(0,0,0,.22);
+      --panel-strong:rgba(0,0,0,.34);
+      --text:#fff;
+      --muted:rgba(255,255,255,.72);
+      --line:rgba(255,255,255,.16);
+      --button:#f3f4f6;
+      --button-text:#111827;
+      --good:#d1fae5;
+      --good-text:#065f46;
+      --bad:#fee2e2;
+      --bad-text:#991b1b;
+      --card:#fff;
+      --ink:#111827;
     }
+
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-    body{margin:0;min-height:100vh;padding:env(safe-area-inset-top) 14px env(safe-area-inset-bottom);
-      background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-    .app{max-width:720px;margin:0 auto;padding:12px 0 28px}
-    h1{font-size:26px;margin:4px 0 2px}.subtitle{font-size:14px;color:var(--muted);margin-bottom:14px}
-    .panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:14px;margin:12px 0}
-    .row{display:flex;align-items:center;justify-content:space-between;gap:12px}.title{font-size:17px;font-weight:800}
-    .score{font-size:13px;color:var(--muted);margin-top:2px}.cards{display:flex;gap:8px;flex-wrap:wrap;min-height:96px;margin-top:12px}
-    .card{width:64px;height:92px;border-radius:10px;background:var(--card);color:var(--ink);padding:7px;display:flex;
-      flex-direction:column;justify-content:space-between;font-weight:800;box-shadow:0 4px 12px #0005}
-    .red{color:#dc2626}.hidden{background:linear-gradient(135deg,#334155,#111827);border:2px solid #64748b}.hidden span{visibility:hidden}
-    button{border:0;border-radius:14px;min-height:52px;padding:12px 10px;font-size:17px;font-weight:800;background:#243147;color:white}
-    button:disabled{opacity:.35}.primary{background:var(--good);color:#052e16}
-    .controls{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}
-    .feedback{min-height:76px;margin-top:12px;border:1px solid var(--line);background:var(--panel2);border-radius:14px;padding:12px}
-    .feedback.good{border-color:#166534;background:#0f2f24}.feedback.bad{border-color:#7f1d1d;background:#35171c}
-    .feedback-title{font-size:18px;font-weight:800;margin-bottom:4px}.feedback-text{font-size:13px;color:#d1d5db;line-height:1.45}
-    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}.stat{background:var(--panel2);border-radius:12px;padding:10px 4px}
-    .stat b{display:block;font-size:21px}.stat span{font-size:12px;color:var(--muted)}.footer{margin-top:16px;text-align:center;font-size:12px;color:#6b7280}
-    @media(max-width:390px){.card{width:58px;height:86px}button{font-size:16px}}
+    html,body{margin:0;min-height:100%;background:var(--felt);color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    body{
+      padding:calc(env(safe-area-inset-top) + 10px) 14px calc(env(safe-area-inset-bottom) + 18px);
+      background:
+        radial-gradient(circle at 50% 15%, rgba(255,255,255,.05), transparent 34%),
+        linear-gradient(var(--felt),var(--felt-dark));
+      min-height:100vh;
+    }
+
+    .app{max-width:720px;margin:0 auto}
+    .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px}
+    h1{font-size:23px;margin:0}
+    .icon-btn{
+      width:44px;height:44px;border-radius:50%;border:1px solid var(--line);
+      background:var(--panel-strong);color:white;font-size:21px;font-weight:700
+    }
+
+    .section{padding:10px 0}
+    .label-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+    .label{font-size:15px;font-weight:800;letter-spacing:.2px}
+    .total{font-size:14px;color:var(--muted)}
+    .cards{display:flex;gap:8px;flex-wrap:wrap;min-height:98px}
+
+    .card{
+      width:64px;height:92px;border-radius:10px;background:var(--card);color:var(--ink);
+      padding:7px;display:flex;flex-direction:column;justify-content:space-between;
+      font-weight:800;box-shadow:0 5px 12px rgba(0,0,0,.32);border:1px solid rgba(0,0,0,.12)
+    }
+    .card.red{color:#dc2626}
+    .card.hidden{
+      background:repeating-linear-gradient(45deg,#1f2937 0,#1f2937 6px,#374151 6px,#374151 12px);
+      border:2px solid #d1d5db
+    }
+    .card.hidden span{visibility:hidden}
+
+    .hand-strip{
+      display:flex;gap:8px;overflow-x:auto;padding:2px 0 4px;margin-bottom:4px
+    }
+    .hand-chip{
+      border:1px solid var(--line);background:var(--panel);color:white;border-radius:999px;
+      padding:7px 10px;font-size:12px;white-space:nowrap
+    }
+    .hand-chip.active{background:white;color:#0b4d2b;font-weight:800}
+
+    .actions{
+      display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0
+    }
+    .actions button{
+      min-height:54px;border:0;border-radius:13px;background:var(--button);
+      color:var(--button-text);font-size:15px;font-weight:850
+    }
+    .actions button:disabled{opacity:.34}
+
+    .feedback{
+      background:var(--panel-strong);border:1px solid var(--line);
+      border-radius:16px;padding:13px;margin-top:8px
+    }
+    .feedback.good{background:var(--good);color:var(--good-text);border-color:transparent}
+    .feedback.bad{background:var(--bad);color:var(--bad-text);border-color:transparent}
+    .feedback-title{font-size:17px;font-weight:850;margin-bottom:4px}
+    .feedback-text{font-size:13px;line-height:1.45}
+    .feedback-actions{margin-top:10px}
+    .why-btn,.next-btn{
+      border:0;border-radius:11px;padding:10px 13px;font-size:14px;font-weight:800
+    }
+    .why-btn{background:#fff;color:#7f1d1d}
+    .next-btn{background:#fff;color:#064e3b}
+
+    .stats{
+      display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px
+    }
+    .stat{
+      background:var(--panel);border:1px solid var(--line);border-radius:14px;
+      text-align:center;padding:10px
+    }
+    .stat b{display:block;font-size:22px}
+    .stat span{font-size:12px;color:var(--muted)}
+    .footer{font-size:11px;color:var(--muted);text-align:center;margin-top:14px}
+
+    .modal-backdrop{
+      position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;
+      align-items:flex-end;justify-content:center;z-index:20
+    }
+    .modal-backdrop.open{display:flex}
+    .modal{
+      width:100%;max-width:720px;background:#f8fafc;color:#111827;
+      border-radius:22px 22px 0 0;padding:18px 18px calc(env(safe-area-inset-bottom) + 22px)
+    }
+    .modal h2{margin:0 0 14px}
+    .setting-row{
+      display:flex;justify-content:space-between;align-items:center;
+      padding:14px 0;border-bottom:1px solid #e5e7eb
+    }
+    .switch{position:relative;width:52px;height:30px}
+    .switch input{opacity:0;width:0;height:0}
+    .slider{
+      position:absolute;inset:0;background:#cbd5e1;border-radius:999px;transition:.2s
+    }
+    .slider:before{
+      content:"";position:absolute;width:24px;height:24px;left:3px;top:3px;
+      background:white;border-radius:50%;transition:.2s;box-shadow:0 1px 4px rgba(0,0,0,.25)
+    }
+    .switch input:checked + .slider{background:#16a34a}
+    .switch input:checked + .slider:before{transform:translateX(22px)}
+    .close-btn{
+      width:100%;margin-top:18px;border:0;border-radius:13px;padding:13px;
+      background:#111827;color:white;font-size:16px;font-weight:800
+    }
+
+    @media(max-width:390px){
+      .card{width:58px;height:86px}
+      .actions button{font-size:14px;padding:0 4px}
+    }
   </style>
 </head>
 <body>
 <main class="app">
-  <h1>Blackjack Trainer</h1>
-  <div class="subtitle">Practice basic-strategy decisions. No betting, no accounts, no tracking.</div>
+  <div class="topbar">
+    <h1>Blackjack Trainer</h1>
+    <button id="settingsBtn" class="icon-btn" aria-label="Settings">⚙︎</button>
+  </div>
 
-  <section class="panel">
-    <div class="title">Dealer</div>
-    <div id="dealerScore" class="score">Showing: —</div>
+  <section class="section">
+    <div class="label-row">
+      <div class="label">Dealer</div>
+      <div id="dealerTotal" class="total">Showing: —</div>
+    </div>
     <div id="dealerCards" class="cards"></div>
   </section>
 
-  <section class="panel">
-    <div class="row">
-      <div><div class="title">Your hand</div><div id="playerScore" class="score">Total: —</div></div>
-      <button id="newHandBtn" class="primary">New Hand</button>
+  <section class="section">
+    <div class="label-row">
+      <div class="label">Your hand</div>
+      <div id="playerTotal" class="total">Total: —</div>
     </div>
+    <div id="handStrip" class="hand-strip" style="display:none"></div>
     <div id="playerCards" class="cards"></div>
-    <div class="controls">
-      <button id="hitBtn">Hit</button><button id="standBtn">Stand</button>
-      <button id="doubleBtn">Double</button><button id="splitBtn">Split</button>
-    </div>
-    <div id="feedback" class="feedback">
-      <div class="feedback-title">Ready</div><div class="feedback-text">Tap New Hand to begin.</div>
-    </div>
   </section>
 
-  <section class="panel">
-    <div class="stats">
-      <div class="stat"><b id="correct">0</b><span>Correct</span></div>
-      <div class="stat"><b id="attempts">0</b><span>Decisions</span></div>
-      <div class="stat"><b id="accuracy">—</b><span>Accuracy</span></div>
-    </div>
+  <div class="actions">
+    <button id="hitBtn">Hit</button>
+    <button id="standBtn">Stand</button>
+    <button id="splitBtn">Split</button>
+    <button id="doubleBtn">Double</button>
+  </div>
+
+  <section id="feedback" class="feedback">
+    <div class="feedback-title">Ready</div>
+    <div class="feedback-text">Tap New Hand to begin.</div>
+    <div id="feedbackActions" class="feedback-actions"></div>
   </section>
-  <div class="footer">All logic runs locally in this page.</div>
+
+  <div class="stats">
+    <div class="stat"><b id="streak">0</b><span>Current streak</span></div>
+    <div class="stat"><b id="accuracy">—</b><span>Correct this session</span></div>
+  </div>
+
+  <div style="margin-top:10px">
+    <button id="newHandBtn" class="next-btn" style="width:100%">New Hand</button>
+  </div>
+
+  <div class="footer">Session stats reset when the page/app is fully restarted.</div>
 </main>
 
+<div id="settingsModal" class="modal-backdrop" role="dialog" aria-modal="true">
+  <div class="modal">
+    <h2>Settings</h2>
+
+    <div class="setting-row">
+      <div>
+        <strong>Allow Split</strong>
+        <div style="font-size:12px;color:#6b7280;margin-top:3px">Show and score split decisions.</div>
+      </div>
+      <label class="switch">
+        <input id="splitSetting" type="checkbox" checked />
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="setting-row">
+      <div>
+        <strong>Allow Double</strong>
+        <div style="font-size:12px;color:#6b7280;margin-top:3px">Show and score double-down decisions.</div>
+      </div>
+      <label class="switch">
+        <input id="doubleSetting" type="checkbox" checked />
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <button id="closeSettingsBtn" class="close-btn">Done</button>
+  </div>
+</div>
+
 <script>
-const suits=["♠","♥","♦","♣"], ranks=["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
-let deck=[],player=[],dealer=[],active=false,firstDecision=true,stats={correct:0,attempts:0};
+const suits=["♠","♥","♦","♣"];
+const ranks=["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
 const $=id=>document.getElementById(id);
+
+let deck=[];
+let dealer=[];
+let hands=[];
+let activeHandIndex=0;
+let handInProgress=false;
+let decisionOpen=false;
+let lastExplanation="";
+let settings={allowSplit:true,allowDouble:true};
+let stats={correct:0,attempts:0,streak:0};
 
 function buildDeck(){
   deck=[];
-  for(let d=0;d<6;d++) for(const suit of suits) for(const rank of ranks) deck.push({rank,suit});
-  for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]];}
+  for(let d=0;d<6;d++){
+    for(const s of suits){
+      for(const r of ranks) deck.push({r,s});
+    }
+  }
+  shuffle(deck);
 }
-function drawCard(){if(deck.length<60)buildDeck();return deck.pop();}
-function cardValue(c){return c.rank==="A"?11:(["K","Q","J"].includes(c.rank)?10:Number(c.rank));}
+function shuffle(a){
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+}
+function draw(){
+  if(deck.length<70) buildDeck();
+  return deck.pop();
+}
+function cardValue(c){
+  if(c.r==="A") return 11;
+  if(["K","Q","J"].includes(c.r)) return 10;
+  return Number(c.r);
+}
 function handValue(cards){
   let total=0,aces=0;
-  for(const c of cards){if(c.rank==="A"){total+=11;aces++;}else total+=cardValue(c);}
+  for(const c of cards){
+    if(c.r==="A"){total+=11;aces++;}
+    else total+=cardValue(c);
+  }
   while(total>21&&aces>0){total-=10;aces--;}
-  const raw=cards.reduce((s,c)=>s+cardValue(c),0);
-  return {total,soft:cards.some(c=>c.rank==="A")&&raw===total};
+  const raw=cards.reduce((sum,c)=>sum+cardValue(c),0);
+  return {total,soft:cards.some(c=>c.r==="A")&&raw===total};
+}
+function isNatural(cards){
+  return cards.length===2 && handValue(cards).total===21;
 }
 function renderCard(c,hidden=false){
-  const red=c.suit==="♥"||c.suit==="♦";
-  return `<div class="card ${red?"red":""} ${hidden?"hidden":""}"><span>${c.rank}${c.suit}</span><span style="align-self:flex-end">${c.suit}</span></div>`;
+  const red=c.s==="♥"||c.s==="♦";
+  return `<div class="card ${red?"red":""} ${hidden?"hidden":""}">
+    <span>${c.r}${c.s}</span><span style="align-self:flex-end">${c.s}</span>
+  </div>`;
 }
-function render(reveal=false){
-  $("dealerCards").innerHTML=dealer.map((c,i)=>renderCard(c,!reveal&&i===1)).join("");
-  $("playerCards").innerHTML=player.map(c=>renderCard(c)).join("");
-  const pv=handValue(player);
-  $("playerScore").textContent=player.length?`Total: ${pv.total}${pv.soft?" (soft)":""}`:"Total: —";
-  $("dealerScore").textContent=dealer.length?(reveal?`Total: ${handValue(dealer).total}`:`Showing: ${cardValue(dealer[0])}`):"Showing: —";
-  $("hitBtn").disabled=!active;$("standBtn").disabled=!active;$("doubleBtn").disabled=!active||player.length!==2;
-  $("splitBtn").disabled=!active||player.length!==2||cardValue(player[0])!==cardValue(player[1]);
-}
-function setFeedback(title,text,type=""){
-  const box=$("feedback"); box.className=`feedback ${type}`;
-  box.innerHTML=`<div class="feedback-title">${title}</div><div class="feedback-text">${text}</div>`;
+function activeHand(){
+  return hands[activeHandIndex] || null;
 }
 function pairValue(cards){
-  if(cards.length!==2)return null;
-  const a=cardValue(cards[0]),b=cardValue(cards[1]);return a===b?a:null;
+  if(cards.length!==2) return null;
+  const a=cardValue(cards[0]),b=cardValue(cards[1]);
+  return a===b?a:null;
 }
-function basicStrategy(cards,up){
-  const v=handValue(cards),pair=pairValue(cards);
-  if(pair!==null){
-    if(pair===11||pair===8)return"split";
-    if(pair===10)return"stand";
-    if(pair===9)return[2,3,4,5,6,8,9].includes(up)?"split":"stand";
-    if(pair===7)return up<=7?"split":"hit";
-    if(pair===6)return up<=6?"split":"hit";
-    if(pair===5)return up<=9?"double":"hit";
-    if(pair===4)return[5,6].includes(up)?"split":"hit";
-    if(pair===2||pair===3)return up<=7?"split":"hit";
-  }
-  if(v.soft&&cards.length===2){
-    const t=v.total;
-    if(t>=19)return"stand";
-    if(t===18){if(up>=3&&up<=6)return"double";if([2,7,8].includes(up))return"stand";return"hit";}
-    if(t===17)return up>=3&&up<=6?"double":"hit";
-    if(t===16||t===15)return up>=4&&up<=6?"double":"hit";
-    if(t===14||t===13)return up>=5&&up<=6?"double":"hit";
-  }
-  const t=v.total;
-  if(t>=17)return"stand";
-  if(t>=13&&t<=16)return up>=2&&up<=6?"stand":"hit";
-  if(t===12)return up>=4&&up<=6?"stand":"hit";
-  if(t===11)return up===11?"hit":"double";
-  if(t===10)return up<=9?"double":"hit";
-  if(t===9)return up>=3&&up<=6?"double":"hit";
-  return"hit";
+function canSplit(hand){
+  return settings.allowSplit && !hand.finished && hand.cards.length===2 &&
+    cardValue(hand.cards[0])===cardValue(hand.cards[1]) && hands.length<4;
 }
+function canDouble(hand){
+  return settings.allowDouble && !hand.finished && hand.cards.length===2;
+}
+
+function render(revealDealer=false){
+  $("dealerCards").innerHTML=dealer.map((c,i)=>renderCard(c,!revealDealer&&i===1)).join("");
+  $("dealerTotal").textContent=dealer.length
+    ? (revealDealer?`Total: ${handValue(dealer).total}`:`Showing: ${cardValue(dealer[0])}`)
+    : "Showing: —";
+
+  const hand=activeHand();
+  if(hand){
+    $("playerCards").innerHTML=hand.cards.map(c=>renderCard(c)).join("");
+    const v=handValue(hand.cards);
+    $("playerTotal").textContent=`Total: ${v.total}${v.soft?" (soft)":""}`;
+  }else{
+    $("playerCards").innerHTML="";
+    $("playerTotal").textContent="Total: —";
+  }
+
+  if(hands.length>1){
+    $("handStrip").style.display="flex";
+    $("handStrip").innerHTML=hands.map((h,i)=>{
+      const v=handValue(h.cards).total;
+      return `<div class="hand-chip ${i===activeHandIndex?"active":""}">Hand ${i+1}: ${v}${h.finished?" ✓":""}</div>`;
+    }).join("");
+  }else{
+    $("handStrip").style.display="none";
+    $("handStrip").innerHTML="";
+  }
+
+  const enabled=handInProgress && hand && !hand.finished;
+  $("hitBtn").disabled=!enabled;
+  $("standBtn").disabled=!enabled;
+  $("splitBtn").disabled=!enabled || !canSplit(hand);
+  $("doubleBtn").disabled=!enabled || !canDouble(hand);
+
+  $("splitBtn").style.display=settings.allowSplit?"block":"none";
+  $("doubleBtn").style.display=settings.allowDouble?"block":"none";
+}
+
+function setFeedback(title,text,type="",showWhy=false){
+  const box=$("feedback");
+  box.className=`feedback ${type}`;
+  box.innerHTML=`<div class="feedback-title">${title}</div>
+    <div class="feedback-text">${text}</div>
+    <div id="feedbackActions" class="feedback-actions"></div>`;
+  if(showWhy){
+    $("feedbackActions").innerHTML=`<button id="whyBtn" class="why-btn">Why?</button>`;
+    $("whyBtn").onclick=()=>setFeedback("Why?",lastExplanation,"bad",false);
+  }
+}
+
 function updateStats(){
-  $("correct").textContent=stats.correct;$("attempts").textContent=stats.attempts;
-  $("accuracy").textContent=stats.attempts?`${Math.round(stats.correct/stats.attempts*100)}%`:"—";
-  localStorage.setItem("blackjackTrainerStats",JSON.stringify(stats));
+  $("streak").textContent=stats.streak;
+  $("accuracy").textContent=stats.attempts
+    ? `${Math.round(stats.correct/stats.attempts*100)}%`
+    : "—";
 }
-function checkDecision(action){
-  if(!firstDecision)return;
-  firstDecision=false;const best=basicStrategy(player,cardValue(dealer[0]));stats.attempts++;
-  if(action===best){stats.correct++;setFeedback("Correct",`Basic strategy prefers ${best.toUpperCase()} here.`,"good");}
-  else setFeedback("Review this one",`You chose ${action.toUpperCase()}. Basic strategy prefers ${best.toUpperCase()}.`,"bad");
+
+function strategyFor(cards,up){
+  const v=handValue(cards);
+  const pair=pairValue(cards);
+
+  if(settings.allowSplit && pair!==null){
+    if(pair===11 || pair===8) return {action:"split",why:"This pair is stronger as two separate starting hands than as one combined hand."};
+    if(pair===10) return {action:"stand",why:"A total of 20 is already very strong, so splitting tens gives up too much value."};
+    if(pair===9){
+      if([2,3,4,5,6,8,9].includes(up)) return {action:"split",why:"Splitting 9s is preferred against these dealer cards because each 9 has good potential to build a strong hand."};
+      return {action:"stand",why:"Against 7, 10-value cards, or Ace, keeping 18 is better than splitting."};
+    }
+    if(pair===7){
+      if(up<=7) return {action:"split",why:"Against a weaker dealer up-card, splitting 7s gives two chances to build strong totals."};
+      return {action:"hit",why:"Against a strong dealer card, splitting 7s is too aggressive; hitting is preferred."};
+    }
+    if(pair===6){
+      if(up<=6) return {action:"split",why:"Against dealer 2–6, the dealer is vulnerable to busting, making two starting 6s more valuable than a hard 12."};
+      return {action:"hit",why:"Against a strong dealer card, hard 12 is weak and splitting does not help enough."};
+    }
+    if(pair===5){
+      if(settings.allowDouble && up<=9) return {action:"double",why:"A pair of 5s is really a strong hard 10. Doubling is better than splitting them."};
+      return {action:"hit",why:"Without a favourable double, treat the pair as hard 10 rather than splitting it."};
+    }
+    if(pair===4){
+      if([5,6].includes(up)) return {action:"split",why:"Against dealer 5 or 6, splitting 4s creates two hands that can profit from the dealer's weak position."};
+      return {action:"hit",why:"Outside dealer 5 or 6, splitting 4s is not valuable enough."};
+    }
+    if(pair===2 || pair===3){
+      if(up<=7) return {action:"split",why:"Against dealer 2–7, two separate low cards have better potential than one weak combined total."};
+      return {action:"hit",why:"Against stronger dealer cards, hitting is safer than splitting small pairs."};
+    }
+  }
+
+  if(v.soft && cards.length===2){
+    const t=v.total;
+    if(t>=19) return {action:"stand",why:"Soft 19 or better is already strong enough to stand."};
+
+    if(t===18){
+      if(settings.allowDouble && up>=3&&up<=6) return {action:"double",why:"Soft 18 is strong enough to press the advantage against dealer 3–6."};
+      if([2,7,8].includes(up)) return {action:"stand",why:"Soft 18 is good enough to stand against dealer 2, 7, or 8."};
+      return {action:"hit",why:"Against dealer 9, 10, or Ace, soft 18 is not strong enough to stand."};
+    }
+    if(t===17){
+      if(settings.allowDouble && up>=3&&up<=6) return {action:"double",why:"Soft 17 can improve safely, and dealer 3–6 is weak enough to justify doubling."};
+      return {action:"hit",why:"Soft 17 is too weak to stand, and without a favourable double you should hit."};
+    }
+    if(t===16||t===15){
+      if(settings.allowDouble && up>=4&&up<=6) return {action:"double",why:"These soft totals can improve safely and dealer 4–6 is vulnerable."};
+      return {action:"hit",why:"The hand is too weak to stand; hit unless the dealer's weakness justifies doubling."};
+    }
+    if(t===14||t===13){
+      if(settings.allowDouble && up>=5&&up<=6) return {action:"double",why:"Very soft totals can still improve safely, and dealer 5–6 is weak enough to double against."};
+      return {action:"hit",why:"This soft total is too weak to stand."};
+    }
+  }
+
+  const t=v.total;
+  if(t>=17) return {action:"stand",why:"Hard 17 or more is usually strong enough to stand; hitting risks busting too often."};
+  if(t>=13&&t<=16){
+    if(up>=2&&up<=6) return {action:"stand",why:"Dealer 2–6 is the vulnerable range. With a stiff hand, standing lets the dealer take the bust risk."};
+    return {action:"hit",why:"Against dealer 7 through Ace, your total is usually too weak to stand."};
+  }
+  if(t===12){
+    if(up>=4&&up<=6) return {action:"stand",why:"Dealer 4–6 is weak enough that standing on 12 is better than taking the bust risk."};
+    return {action:"hit",why:"Against dealer 2, 3, or 7 through Ace, 12 is too weak to stand."};
+  }
+  if(t===11){
+    if(settings.allowDouble && up!==11) return {action:"double",why:"Hard 11 is one of the strongest doubling hands because many cards produce a strong total."};
+    return {action:"hit",why:"Hard 11 should be hit when doubling is unavailable or not preferred against the dealer Ace in this trainer."};
+  }
+  if(t===10){
+    if(settings.allowDouble && up<=9) return {action:"double",why:"Hard 10 has strong improvement potential against dealer 2–9."};
+    return {action:"hit",why:"Against dealer 10 or Ace, the dealer is too strong to justify doubling 10."};
+  }
+  if(t===9){
+    if(settings.allowDouble && up>=3&&up<=6) return {action:"double",why:"Hard 9 can be doubled profitably against the dealer's weakest up-cards."};
+    return {action:"hit",why:"Hard 9 is too weak to stand and should only be doubled against dealer 3–6."};
+  }
+  return {action:"hit",why:"This total is too low to stand, so hitting is the best way to improve it."};
+}
+
+function scoreDecision(action){
+  if(!decisionOpen) return;
+  const hand=activeHand();
+  const best=strategyFor(hand.cards,cardValue(dealer[0]));
+  stats.attempts++;
+
+  if(action===best.action){
+    stats.correct++;
+    stats.streak++;
+    setFeedback("Correct",`${action[0].toUpperCase()+action.slice(1)} is the right play here.`,"good");
+  }else{
+    stats.streak=0;
+    lastExplanation=best.why;
+    setFeedback("Not quite",`You chose ${action.toUpperCase()}. The better play is ${best.action.toUpperCase()}.`,"bad",true);
+  }
   updateStats();
+  decisionOpen=false;
 }
-function dealerPlay(){while(handValue(dealer).total<17)dealer.push(drawCard());}
-function finishHand(){
-  active=false;dealerPlay();render(true);
-  const p=handValue(player).total,d=handValue(dealer).total;
-  if(p>21)setFeedback("Bust",`Your total is ${p}.`);
-  else if(d>21)setFeedback("Dealer busts",`Dealer finishes with ${d}.`);
-  else if(p>d)setFeedback("You win the hand",`${p} beats ${d}.`);
-  else if(p<d)setFeedback("Dealer wins the hand",`${d} beats ${p}.`);
-  else setFeedback("Push",`Both finish with ${p}.`);
+
+function openNextDecision(){
+  const hand=activeHand();
+  if(!hand || hand.finished) return;
+  decisionOpen=true;
 }
+
+function nextPlayableHand(){
+  for(let i=activeHandIndex+1;i<hands.length;i++){
+    if(!hands[i].finished){
+      activeHandIndex=i;
+      decisionOpen=true;
+      render(false);
+      setFeedback(`Hand ${i+1}`,"Choose the best play for this hand.");
+      return;
+    }
+  }
+  finishRound();
+}
+
+function dealerPlay(){
+  while(handValue(dealer).total<17) dealer.push(draw());
+}
+
+function finishRound(){
+  handInProgress=false;
+  decisionOpen=false;
+  dealerPlay();
+  render(true);
+
+  const dealerTotal=handValue(dealer).total;
+  const results=hands.map((h,i)=>{
+    const p=handValue(h.cards).total;
+    if(p>21) return `Hand ${i+1}: bust (${p})`;
+    if(dealerTotal>21) return `Hand ${i+1}: win — dealer bust`;
+    if(p>dealerTotal) return `Hand ${i+1}: win ${p}–${dealerTotal}`;
+    if(p<dealerTotal) return `Hand ${i+1}: loss ${p}–${dealerTotal}`;
+    return `Hand ${i+1}: push ${p}`;
+  });
+
+  setFeedback("Hand complete",results.join(" • "));
+}
+
+function stand(){
+  if(!handInProgress) return;
+  scoreDecision("stand");
+  const hand=activeHand();
+  hand.finished=true;
+  render(false);
+  nextPlayableHand();
+}
+
+function hit(){
+  if(!handInProgress) return;
+  scoreDecision("hit");
+  const hand=activeHand();
+  hand.cards.push(draw());
+  const v=handValue(hand.cards).total;
+  render(false);
+
+  if(v>=21){
+    hand.finished=true;
+    if(v>21) setFeedback("Bust",`Hand ${activeHandIndex+1} finishes with ${v}.`);
+    nextPlayableHand();
+  }else{
+    decisionOpen=true;
+  }
+}
+
+function doubleDown(){
+  if(!handInProgress) return;
+  const hand=activeHand();
+  if(!canDouble(hand)) return;
+
+  scoreDecision("double");
+  hand.cards.push(draw());
+  hand.finished=true;
+  hand.doubled=true;
+  render(false);
+  nextPlayableHand();
+}
+
+function splitHand(){
+  if(!handInProgress) return;
+  const hand=activeHand();
+  if(!canSplit(hand)) return;
+
+  scoreDecision("split");
+
+  const first=hand.cards[0];
+  const second=hand.cards[1];
+
+  hands.splice(activeHandIndex,1,
+    {cards:[first,draw()],finished:false,doubled:false},
+    {cards:[second,draw()],finished:false,doubled:false}
+  );
+
+  // Avoid natural 21 immediately after a split as well, to keep every hand trainable.
+  for(const h of [hands[activeHandIndex],hands[activeHandIndex+1]]){
+    while(isNatural(h.cards)) h.cards[1]=draw();
+  }
+
+  decisionOpen=true;
+  render(false);
+  setFeedback(`Hand ${activeHandIndex+1}`,"Split complete. Play the first hand.");
+}
+
+function dealTrainableRound(){
+  let p,d;
+
+  do{
+    p=[draw(),draw()];
+    d=[draw(),draw()];
+  }while(isNatural(p) || isNatural(d));
+
+  return {p,d};
+}
+
 function newHand(){
-  player=[drawCard(),drawCard()];dealer=[drawCard(),drawCard()];active=true;firstDecision=true;
-  setFeedback("Your decision",`Dealer shows ${dealer[0].rank}${dealer[0].suit}. Choose the best play.`);render(false);
-  if(handValue(player).total===21){active=false;render(true);setFeedback("Blackjack","Natural 21. No decision to score.","good");}
+  const dealt=dealTrainableRound();
+  dealer=dealt.d;
+  hands=[{cards:dealt.p,finished:false,doubled:false}];
+  activeHandIndex=0;
+  handInProgress=true;
+  decisionOpen=true;
+
+  setFeedback("Your decision",`Dealer shows ${dealer[0].r}${dealer[0].s}. Choose the best play.`);
+  render(false);
 }
-$("newHandBtn").addEventListener("click",newHand);
-$("hitBtn").addEventListener("click",()=>{checkDecision("hit");player.push(drawCard());render(false);if(handValue(player).total>=21)finishHand();});
-$("standBtn").addEventListener("click",()=>{checkDecision("stand");finishHand();});
-$("doubleBtn").addEventListener("click",()=>{checkDecision("double");player.push(drawCard());finishHand();});
-$("splitBtn").addEventListener("click",()=>{checkDecision("split");active=false;render(true);setFeedback("Split selected","The decision has been scored. Full split-hand play is a good next upgrade.");});
-try{const s=JSON.parse(localStorage.getItem("blackjackTrainerStats"));if(s&&Number.isFinite(s.correct)&&Number.isFinite(s.attempts))stats=s;}catch{}
-buildDeck();updateStats();render(false);
+
+$("hitBtn").onclick=hit;
+$("standBtn").onclick=stand;
+$("splitBtn").onclick=splitHand;
+$("doubleBtn").onclick=doubleDown;
+$("newHandBtn").onclick=newHand;
+
+$("settingsBtn").onclick=()=>$("settingsModal").classList.add("open");
+$("closeSettingsBtn").onclick=()=>$("settingsModal").classList.remove("open");
+$("settingsModal").onclick=e=>{
+  if(e.target===$("settingsModal")) $("settingsModal").classList.remove("open");
+};
+
+$("splitSetting").onchange=e=>{
+  settings.allowSplit=e.target.checked;
+  localStorage.setItem("bjAllowSplit",settings.allowSplit?"1":"0");
+  render(false);
+};
+$("doubleSetting").onchange=e=>{
+  settings.allowDouble=e.target.checked;
+  localStorage.setItem("bjAllowDouble",settings.allowDouble?"1":"0");
+  render(false);
+};
+
+settings.allowSplit=localStorage.getItem("bjAllowSplit")!=="0";
+settings.allowDouble=localStorage.getItem("bjAllowDouble")!=="0";
+$("splitSetting").checked=settings.allowSplit;
+$("doubleSetting").checked=settings.allowDouble;
+
+buildDeck();
+updateStats();
+render(false);
 </script>
 </body>
 </html>
