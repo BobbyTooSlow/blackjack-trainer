@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1220" />
+  <title>Blackjack Trainer</title>
+  <style>
+    :root{
+      --bg:#0b1220; --panel:#111827; --panel2:#172033; --text:#f8fafc;
+      --muted:#9ca3af; --line:#263247; --good:#22c55e; --card:#fff; --ink:#111827;
+    }
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    body{margin:0;min-height:100vh;padding:env(safe-area-inset-top) 14px env(safe-area-inset-bottom);
+      background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    .app{max-width:720px;margin:0 auto;padding:12px 0 28px}
+    h1{font-size:26px;margin:4px 0 2px}.subtitle{font-size:14px;color:var(--muted);margin-bottom:14px}
+    .panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:14px;margin:12px 0}
+    .row{display:flex;align-items:center;justify-content:space-between;gap:12px}.title{font-size:17px;font-weight:800}
+    .score{font-size:13px;color:var(--muted);margin-top:2px}.cards{display:flex;gap:8px;flex-wrap:wrap;min-height:96px;margin-top:12px}
+    .card{width:64px;height:92px;border-radius:10px;background:var(--card);color:var(--ink);padding:7px;display:flex;
+      flex-direction:column;justify-content:space-between;font-weight:800;box-shadow:0 4px 12px #0005}
+    .red{color:#dc2626}.hidden{background:linear-gradient(135deg,#334155,#111827);border:2px solid #64748b}.hidden span{visibility:hidden}
+    button{border:0;border-radius:14px;min-height:52px;padding:12px 10px;font-size:17px;font-weight:800;background:#243147;color:white}
+    button:disabled{opacity:.35}.primary{background:var(--good);color:#052e16}
+    .controls{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}
+    .feedback{min-height:76px;margin-top:12px;border:1px solid var(--line);background:var(--panel2);border-radius:14px;padding:12px}
+    .feedback.good{border-color:#166534;background:#0f2f24}.feedback.bad{border-color:#7f1d1d;background:#35171c}
+    .feedback-title{font-size:18px;font-weight:800;margin-bottom:4px}.feedback-text{font-size:13px;color:#d1d5db;line-height:1.45}
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}.stat{background:var(--panel2);border-radius:12px;padding:10px 4px}
+    .stat b{display:block;font-size:21px}.stat span{font-size:12px;color:var(--muted)}.footer{margin-top:16px;text-align:center;font-size:12px;color:#6b7280}
+    @media(max-width:390px){.card{width:58px;height:86px}button{font-size:16px}}
+  </style>
+</head>
+<body>
+<main class="app">
+  <h1>Blackjack Trainer</h1>
+  <div class="subtitle">Practice basic-strategy decisions. No betting, no accounts, no tracking.</div>
+
+  <section class="panel">
+    <div class="title">Dealer</div>
+    <div id="dealerScore" class="score">Showing: —</div>
+    <div id="dealerCards" class="cards"></div>
+  </section>
+
+  <section class="panel">
+    <div class="row">
+      <div><div class="title">Your hand</div><div id="playerScore" class="score">Total: —</div></div>
+      <button id="newHandBtn" class="primary">New Hand</button>
+    </div>
+    <div id="playerCards" class="cards"></div>
+    <div class="controls">
+      <button id="hitBtn">Hit</button><button id="standBtn">Stand</button>
+      <button id="doubleBtn">Double</button><button id="splitBtn">Split</button>
+    </div>
+    <div id="feedback" class="feedback">
+      <div class="feedback-title">Ready</div><div class="feedback-text">Tap New Hand to begin.</div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="stats">
+      <div class="stat"><b id="correct">0</b><span>Correct</span></div>
+      <div class="stat"><b id="attempts">0</b><span>Decisions</span></div>
+      <div class="stat"><b id="accuracy">—</b><span>Accuracy</span></div>
+    </div>
+  </section>
+  <div class="footer">All logic runs locally in this page.</div>
+</main>
+
+<script>
+const suits=["♠","♥","♦","♣"], ranks=["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
+let deck=[],player=[],dealer=[],active=false,firstDecision=true,stats={correct:0,attempts:0};
+const $=id=>document.getElementById(id);
+
+function buildDeck(){
+  deck=[];
+  for(let d=0;d<6;d++) for(const suit of suits) for(const rank of ranks) deck.push({rank,suit});
+  for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]];}
+}
+function drawCard(){if(deck.length<60)buildDeck();return deck.pop();}
+function cardValue(c){return c.rank==="A"?11:(["K","Q","J"].includes(c.rank)?10:Number(c.rank));}
+function handValue(cards){
+  let total=0,aces=0;
+  for(const c of cards){if(c.rank==="A"){total+=11;aces++;}else total+=cardValue(c);}
+  while(total>21&&aces>0){total-=10;aces--;}
+  const raw=cards.reduce((s,c)=>s+cardValue(c),0);
+  return {total,soft:cards.some(c=>c.rank==="A")&&raw===total};
+}
+function renderCard(c,hidden=false){
+  const red=c.suit==="♥"||c.suit==="♦";
+  return `<div class="card ${red?"red":""} ${hidden?"hidden":""}"><span>${c.rank}${c.suit}</span><span style="align-self:flex-end">${c.suit}</span></div>`;
+}
+function render(reveal=false){
+  $("dealerCards").innerHTML=dealer.map((c,i)=>renderCard(c,!reveal&&i===1)).join("");
+  $("playerCards").innerHTML=player.map(c=>renderCard(c)).join("");
+  const pv=handValue(player);
+  $("playerScore").textContent=player.length?`Total: ${pv.total}${pv.soft?" (soft)":""}`:"Total: —";
+  $("dealerScore").textContent=dealer.length?(reveal?`Total: ${handValue(dealer).total}`:`Showing: ${cardValue(dealer[0])}`):"Showing: —";
+  $("hitBtn").disabled=!active;$("standBtn").disabled=!active;$("doubleBtn").disabled=!active||player.length!==2;
+  $("splitBtn").disabled=!active||player.length!==2||cardValue(player[0])!==cardValue(player[1]);
+}
+function setFeedback(title,text,type=""){
+  const box=$("feedback"); box.className=`feedback ${type}`;
+  box.innerHTML=`<div class="feedback-title">${title}</div><div class="feedback-text">${text}</div>`;
+}
+function pairValue(cards){
+  if(cards.length!==2)return null;
+  const a=cardValue(cards[0]),b=cardValue(cards[1]);return a===b?a:null;
+}
+function basicStrategy(cards,up){
+  const v=handValue(cards),pair=pairValue(cards);
+  if(pair!==null){
+    if(pair===11||pair===8)return"split";
+    if(pair===10)return"stand";
+    if(pair===9)return[2,3,4,5,6,8,9].includes(up)?"split":"stand";
+    if(pair===7)return up<=7?"split":"hit";
+    if(pair===6)return up<=6?"split":"hit";
+    if(pair===5)return up<=9?"double":"hit";
+    if(pair===4)return[5,6].includes(up)?"split":"hit";
+    if(pair===2||pair===3)return up<=7?"split":"hit";
+  }
+  if(v.soft&&cards.length===2){
+    const t=v.total;
+    if(t>=19)return"stand";
+    if(t===18){if(up>=3&&up<=6)return"double";if([2,7,8].includes(up))return"stand";return"hit";}
+    if(t===17)return up>=3&&up<=6?"double":"hit";
+    if(t===16||t===15)return up>=4&&up<=6?"double":"hit";
+    if(t===14||t===13)return up>=5&&up<=6?"double":"hit";
+  }
+  const t=v.total;
+  if(t>=17)return"stand";
+  if(t>=13&&t<=16)return up>=2&&up<=6?"stand":"hit";
+  if(t===12)return up>=4&&up<=6?"stand":"hit";
+  if(t===11)return up===11?"hit":"double";
+  if(t===10)return up<=9?"double":"hit";
+  if(t===9)return up>=3&&up<=6?"double":"hit";
+  return"hit";
+}
+function updateStats(){
+  $("correct").textContent=stats.correct;$("attempts").textContent=stats.attempts;
+  $("accuracy").textContent=stats.attempts?`${Math.round(stats.correct/stats.attempts*100)}%`:"—";
+  localStorage.setItem("blackjackTrainerStats",JSON.stringify(stats));
+}
+function checkDecision(action){
+  if(!firstDecision)return;
+  firstDecision=false;const best=basicStrategy(player,cardValue(dealer[0]));stats.attempts++;
+  if(action===best){stats.correct++;setFeedback("Correct",`Basic strategy prefers ${best.toUpperCase()} here.`,"good");}
+  else setFeedback("Review this one",`You chose ${action.toUpperCase()}. Basic strategy prefers ${best.toUpperCase()}.`,"bad");
+  updateStats();
+}
+function dealerPlay(){while(handValue(dealer).total<17)dealer.push(drawCard());}
+function finishHand(){
+  active=false;dealerPlay();render(true);
+  const p=handValue(player).total,d=handValue(dealer).total;
+  if(p>21)setFeedback("Bust",`Your total is ${p}.`);
+  else if(d>21)setFeedback("Dealer busts",`Dealer finishes with ${d}.`);
+  else if(p>d)setFeedback("You win the hand",`${p} beats ${d}.`);
+  else if(p<d)setFeedback("Dealer wins the hand",`${d} beats ${p}.`);
+  else setFeedback("Push",`Both finish with ${p}.`);
+}
+function newHand(){
+  player=[drawCard(),drawCard()];dealer=[drawCard(),drawCard()];active=true;firstDecision=true;
+  setFeedback("Your decision",`Dealer shows ${dealer[0].rank}${dealer[0].suit}. Choose the best play.`);render(false);
+  if(handValue(player).total===21){active=false;render(true);setFeedback("Blackjack","Natural 21. No decision to score.","good");}
+}
+$("newHandBtn").addEventListener("click",newHand);
+$("hitBtn").addEventListener("click",()=>{checkDecision("hit");player.push(drawCard());render(false);if(handValue(player).total>=21)finishHand();});
+$("standBtn").addEventListener("click",()=>{checkDecision("stand");finishHand();});
+$("doubleBtn").addEventListener("click",()=>{checkDecision("double");player.push(drawCard());finishHand();});
+$("splitBtn").addEventListener("click",()=>{checkDecision("split");active=false;render(true);setFeedback("Split selected","The decision has been scored. Full split-hand play is a good next upgrade.");});
+try{const s=JSON.parse(localStorage.getItem("blackjackTrainerStats"));if(s&&Number.isFinite(s.correct)&&Number.isFinite(s.attempts))stats=s;}catch{}
+buildDeck();updateStats();render(false);
+</script>
+</body>
+</html>
