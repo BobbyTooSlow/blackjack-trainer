@@ -36,6 +36,10 @@
         linear-gradient(var(--felt),var(--felt-dark));
       min-height:100vh;
     }
+    body.black-theme{
+      --felt:#111111;
+      --felt-dark:#000000;
+    }
 
     .app{max-width:720px;margin:0 auto}
     .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px}
@@ -218,6 +222,28 @@
 
     <div class="setting-row">
       <div>
+        <strong>Background</strong>
+        <div style="font-size:12px;color:#6b7280;margin-top:3px">Choose the table background.</div>
+      </div>
+      <select id="backgroundSetting" style="font-size:16px;padding:8px;border-radius:10px;border:1px solid #cbd5e1;background:white">
+        <option value="green">Green</option>
+        <option value="black">Black</option>
+      </select>
+    </div>
+
+    <div class="setting-row">
+      <div>
+        <strong>Dealer hits soft 17</strong>
+        <div style="font-size:12px;color:#6b7280;margin-top:3px">On by default.</div>
+      </div>
+      <label class="switch">
+        <input id="soft17Setting" type="checkbox" checked />
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="setting-row">
+      <div>
         <strong>Dealer Card Delay</strong>
         <div style="font-size:12px;color:#6b7280;margin-top:3px">Delay between dealer cards.</div>
       </div>
@@ -247,7 +273,7 @@ let activeHandIndex=0;
 let handInProgress=false;
 let decisionOpen=false;
 let lastExplanation="";
-let settings={allowSplit:true,allowDouble:true,dealerDelay:2000};
+let settings={allowSplit:true,allowDouble:true,dealerDelay:2000,background:"green",hitSoft17:true};
 let stats={correct:0,attempts:0,streak:0};
 let dealerAnimating=false;
 
@@ -496,33 +522,54 @@ function sleep(ms){
 async function dealerPlayAnimated(){
   dealerAnimating=true;
   render(true,2);
-  await sleep(settings.dealerDelay);
 
-  while(handValue(dealer).total<17){
+  while(true){
+    const v=handValue(dealer);
+    const shouldHit = v.total<17 || (v.total===17 && v.soft && settings.hitSoft17);
+    if(!shouldHit) break;
+
+    await sleep(settings.dealerDelay);
     dealer.push(draw());
     render(true,dealer.length);
-    await sleep(settings.dealerDelay);
   }
 
   dealerAnimating=false;
 }
-
 async function finishRound(){
   handInProgress=false;
   decisionOpen=false;
+
   await dealerPlayAnimated();
   render(true);
 
   const dealerTotal=handValue(dealer).total;
+
+  if(hands.length===1){
+    const p=handValue(hands[0].cards).total;
+
+    if(p>21){
+      setFeedback("LOSS!",`You bust (${p})`,"bad");
+    }else if(dealerTotal>21){
+      setFeedback("WIN!",`Dealer bust (${dealerTotal})`,"good");
+    }else if(p>dealerTotal){
+      setFeedback("WIN!",`You win ${p} to ${dealerTotal}`,"good");
+    }else if(p<dealerTotal){
+      setFeedback("LOSS!",`Dealer wins ${dealerTotal} to ${p}`,"bad");
+    }else{
+      setFeedback("PUSH",`You both have ${p}`);
+    }
+    return;
+  }
+
   const results=hands.map((h,i)=>{
     const p=handValue(h.cards).total;
-    if(p>21) return `Hand ${i+1}: bust (${p})`;
-    if(dealerTotal>21) return `Hand ${i+1}: win — dealer bust`;
-    if(p>dealerTotal) return `Hand ${i+1}: win ${p}–${dealerTotal}`;
-    if(p<dealerTotal) return `Hand ${i+1}: loss ${p}–${dealerTotal}`;
-    return `Hand ${i+1}: push ${p}`;
+    if(p>21) return `Hand ${i+1}: loss — you bust (${p})`;
+    if(dealerTotal>21) return `Hand ${i+1}: win — dealer bust (${dealerTotal})`;
+    if(p>dealerTotal) return `Hand ${i+1}: win ${p} to ${dealerTotal}`;
+    if(p<dealerTotal) return `Hand ${i+1}: loss ${dealerTotal} to ${p}`;
+    return `Hand ${i+1}: push at ${p}`;
   });
-  setFeedback("Hand complete",results.join(" • "));
+  setFeedback("ROUND COMPLETE",results.join(" • "));
 }
 function stand(){
   if(!handInProgress) return;
@@ -607,22 +654,11 @@ async function newHand(){
   hands=[{cards:dealt.p,finished:false,doubled:false}];
   activeHandIndex=0;
   handInProgress=true;
-  decisionOpen=false;
-  dealerAnimating=true;
-
-  setFeedback("Dealing","Dealer is dealing the hand.");
-  render(false,0);
-
-  await sleep(settings.dealerDelay);
-  render(false,1);
-
-  await sleep(settings.dealerDelay);
-  render(false,2);
-
-  dealerAnimating=false;
   decisionOpen=true;
+  dealerAnimating=false;
+
   setFeedback("Your decision",`Dealer shows ${dealer[0].r}${dealer[0].s}. Choose the best play.`);
-  render(false);
+  render(false,2);
 }
 $("hitBtn").onclick=hit;
 $("standBtn").onclick=stand;
@@ -652,12 +688,29 @@ $("dealerDelaySetting").onchange=e=>{
   localStorage.setItem("bjDealerDelay",String(settings.dealerDelay));
 };
 
+$("backgroundSetting").onchange=e=>{
+  settings.background=e.target.value;
+  localStorage.setItem("bjBackground",settings.background);
+  document.body.classList.toggle("black-theme",settings.background==="black");
+};
+
+$("soft17Setting").onchange=e=>{
+  settings.hitSoft17=e.target.checked;
+  localStorage.setItem("bjHitSoft17",settings.hitSoft17?"1":"0");
+};
+
 settings.allowSplit=localStorage.getItem("bjAllowSplit")!=="0";
 settings.allowDouble=localStorage.getItem("bjAllowDouble")!=="0";
 settings.dealerDelay=Number(localStorage.getItem("bjDealerDelay")||"2000");
+settings.background=localStorage.getItem("bjBackground")||"green";
+settings.hitSoft17=localStorage.getItem("bjHitSoft17")!=="0";
+
 $("splitSetting").checked=settings.allowSplit;
 $("doubleSetting").checked=settings.allowDouble;
 $("dealerDelaySetting").value=String(settings.dealerDelay);
+$("backgroundSetting").value=settings.background;
+$("soft17Setting").checked=settings.hitSoft17;
+document.body.classList.toggle("black-theme",settings.background==="black");
 
 buildDeck();
 updateStats();
