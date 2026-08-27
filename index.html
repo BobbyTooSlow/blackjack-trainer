@@ -310,6 +310,32 @@
       line-height:1.05;
     }
 
+    .outcome.reveal-odds{
+      cursor:pointer;
+      user-select:none;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      min-height:82px;
+    }
+    .outcome.reveal-odds .reveal-top{
+      display:block;
+      font-size:24px;
+      font-weight:950;
+      line-height:1;
+      letter-spacing:.4px;
+    }
+    .outcome.reveal-odds .reveal-bottom{
+      display:block;
+      margin-top:4px;
+      font-size:22px;
+      font-weight:950;
+      line-height:1;
+      letter-spacing:.4px;
+    }
+
     .chance{
       display:block;
       min-height:14px;
@@ -692,18 +718,7 @@
       </label>
     </div>
 
-    <div class="setting-row">
-      <div>
-        <strong>Show win chances</strong>
-        <div class="setting-note">Show estimated win percentages for Hit and Stand. Recalculates after every hit.</div>
-      </div>
-      <label class="switch">
-        <input id="winChanceSetting" type="checkbox" />
-        <span class="slider"></span>
-      </label>
-    </div>
-
-    <div class="setting-row">
+<div class="setting-row">
       <div>
         <strong>Dealer Card Delay</strong>
         <div class="setting-note">Delay before each dealer draw after the hole card.</div>
@@ -742,8 +757,7 @@ let settings={
   hitSoft17:true,
   dealerDelay:2000,
   playerName:"YOU",
-  prohibitAutomaticStands:true,
-  showWinChances:false
+  prohibitAutomaticStands:true
 };
 
 let persistentDecision={
@@ -918,7 +932,9 @@ function render(revealDealer=false){
   $("splitBtn").classList.toggle("teach-hidden",settings.splitMode==="teach");
   $("doubleBtn").classList.toggle("teach-hidden",settings.doubleMode==="teach");
   updateTeachingCues();
-  scheduleWinChanceUpdate();
+  if(handInProgress && !dealerAnimating && !oddsRevealed){
+    setRevealOddsBox();
+  }
 }
 
 function renderDecisionBox(){
@@ -1116,20 +1132,37 @@ function updateTeachingCues(){
 }
 
 let chanceJob=0;
+let oddsRevealed=false;
+
+function setRevealOddsBox(){
+  const box=$("outcome");
+  if(!box || !handInProgress) return;
+
+  box.className="outcome reveal-odds";
+  box.innerHTML=`<span class="reveal-top">SHOW</span><span class="reveal-bottom">ODDS</span>`;
+  box.onclick=()=>{
+    oddsRevealed=true;
+    scheduleWinChanceUpdate();
+  };
+}
+
+function hideOddsForNewDecision(){
+  oddsRevealed=false;
+  chanceJob++;
+  $("hitChance").textContent="";
+  $("standChance").textContent="";
+  if(handInProgress && !dealerAnimating) setRevealOddsBox();
+}
 
 function scheduleWinChanceUpdate(){
   chanceJob++;
 
-  if(!settings.showWinChances){
-    $("hitChance").textContent="";
-    $("standChance").textContent="";
-    return;
-  }
-
   const hand=activeHand();
-  if(!handInProgress || dealerAnimating || !hand || hand.finished || dealer.length<2){
+
+  if(!oddsRevealed || !handInProgress || dealerAnimating || !hand || hand.finished || dealer.length<2){
     $("hitChance").textContent="";
     $("standChance").textContent="";
+    if(handInProgress && !dealerAnimating) setRevealOddsBox();
     return;
   }
 
@@ -1144,6 +1177,7 @@ function scheduleWinChanceUpdate(){
 
     $("hitChance").textContent=`${Math.round(odds.hit*100)}%`;
     $("standChance").textContent=`${Math.round(odds.stand*100)}%`;
+    setRevealOddsBox();
   },30);
 }
 
@@ -1307,9 +1341,12 @@ async function dealerPlayAnimated(){
 
 async function finishRound(){
   handInProgress=false;
+  oddsRevealed=false;
   chanceJob++;
   $("hitChance").textContent="";
   $("standChance").textContent="";
+  $("outcome").onclick=null;
+  $("outcome").classList.remove("reveal-odds");
   await dealerPlayAnimated();
   render(true);
 
@@ -1529,12 +1566,6 @@ $("soft17Setting").onchange=e=>{
   localStorage.setItem("bjHitSoft17",settings.hitSoft17?"1":"0");
 };
 
-$("winChanceSetting").onchange=e=>{
-  settings.showWinChances=e.target.checked;
-  localStorage.setItem("bjShowWinChances",settings.showWinChances?"1":"0");
-  scheduleWinChanceUpdate();
-};
-
 $("dealerDelaySetting").onchange=e=>{
   settings.dealerDelay=Number(e.target.value);
   localStorage.setItem("bjDealerDelay",String(settings.dealerDelay));
@@ -1551,7 +1582,6 @@ const legacyBlackjack=localStorage.getItem("bjProhibitBlackjacks");
 settings.prohibitAutomaticStands=savedAutoStand!==null
   ? savedAutoStand!=="0"
   : legacyBlackjack!=="0";
-settings.showWinChances=localStorage.getItem("bjShowWinChances")==="1";
 const savedSplitMode=localStorage.getItem("bjSplitMode");
 const savedDoubleMode=localStorage.getItem("bjDoubleMode");
 settings.splitMode=savedSplitMode || (localStorage.getItem("bjAllowSplit")==="0" ? "off" : "on");
@@ -1562,7 +1592,6 @@ settings.dealerDelay=Number(localStorage.getItem("bjDealerDelay")||"2000");
 settings.playerName=localStorage.getItem("bjPlayerName")||"YOU";
 
 $("blackjackSetting").checked=settings.prohibitAutomaticStands;
-$("winChanceSetting").checked=settings.showWinChances;
 updateModeControls();
 $("backgroundSetting").value=settings.background;
 $("soft17Setting").checked=settings.hitSoft17;
