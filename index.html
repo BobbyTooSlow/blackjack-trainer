@@ -180,6 +180,7 @@
       50%{opacity:.92;filter:saturate(1);box-shadow:0 0 0 3px rgba(255,255,255,.22),0 0 18px rgba(255,255,255,.28)}
     }
     .teach-cue{
+      visibility:visible !important;
       animation:teachPulse 1.15s ease-in-out infinite !important;
     }
 
@@ -301,6 +302,30 @@
       font-size:18px;
       font-weight:900;
       letter-spacing:.1px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      line-height:1.05;
+    }
+
+    .chance{
+      display:block;
+      min-height:14px;
+      margin-top:3px;
+      font-size:13px;
+      font-weight:800;
+      opacity:.92;
+    }
+
+    .teach-hidden{
+      visibility:hidden !important;
+      pointer-events:none !important;
+    }
+
+    .teach-hidden.teach-cue{
+      visibility:visible !important;
     }
 
     #hitBtn{background:var(--hit)}
@@ -562,11 +587,11 @@
   </section>
 
   <div class="actions">
-    <button id="hitBtn">HIT</button>
-    <button id="standBtn">STAND</button>
-    <button id="splitBtn">SPLIT</button>
-    <button id="doubleBtn">DOUBLE</button>
-    <button id="newHandBtn">NEW HAND</button>
+    <button id="hitBtn"><span>HIT</span><span id="hitChance" class="chance"></span></button>
+    <button id="standBtn"><span>STAND</span><span id="standChance" class="chance"></span></button>
+    <button id="splitBtn"><span>SPLIT</span></button>
+    <button id="doubleBtn"><span>DOUBLE</span></button>
+    <button id="newHandBtn"><span>NEW HAND</span></button>
   </div>
 
   <div class="status-row">
@@ -669,6 +694,17 @@
 
     <div class="setting-row">
       <div>
+        <strong>Show win chances</strong>
+        <div class="setting-note">Show estimated win percentages for Hit and Stand. Recalculates after every hit.</div>
+      </div>
+      <label class="switch">
+        <input id="winChanceSetting" type="checkbox" />
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="setting-row">
+      <div>
         <strong>Dealer Card Delay</strong>
         <div class="setting-note">Delay before each dealer draw after the hole card.</div>
       </div>
@@ -706,7 +742,8 @@ let settings={
   hitSoft17:true,
   dealerDelay:2000,
   playerName:"YOU",
-  prohibitAutomaticStands:true
+  prohibitAutomaticStands:true,
+  showWinChances:false
 };
 
 let persistentDecision={
@@ -878,7 +915,10 @@ function render(revealDealer=false){
 
   $("splitBtn").classList.remove("slot-hidden");
   $("doubleBtn").classList.remove("slot-hidden");
+  $("splitBtn").classList.toggle("teach-hidden",settings.splitMode==="teach");
+  $("doubleBtn").classList.toggle("teach-hidden",settings.doubleMode==="teach");
   updateTeachingCues();
+  scheduleWinChanceUpdate();
 }
 
 function renderDecisionBox(){
@@ -1075,6 +1115,126 @@ function updateTeachingCues(){
   }
 }
 
+let chanceJob=0;
+
+function scheduleWinChanceUpdate(){
+  chanceJob++;
+
+  if(!settings.showWinChances){
+    $("hitChance").textContent="";
+    $("standChance").textContent="";
+    return;
+  }
+
+  const hand=activeHand();
+  if(!handInProgress || dealerAnimating || !hand || hand.finished || dealer.length<2){
+    $("hitChance").textContent="";
+    $("standChance").textContent="";
+    return;
+  }
+
+  const job=chanceJob;
+  $("hitChance").textContent="…";
+  $("standChance").textContent="…";
+
+  setTimeout(()=>{
+    if(job!==chanceJob) return;
+    const odds=estimateWinChances(10000);
+    if(job!==chanceJob || !odds) return;
+
+    $("hitChance").textContent=`${Math.round(odds.hit*100)}%`;
+    $("standChance").textContent=`${Math.round(odds.stand*100)}%`;
+  },30);
+}
+
+function unseenPoolForSimulation(){
+  // The hole card is unknown to the player, so put it back into the
+  // simulated unseen shoe rather than leaking its identity into the odds.
+  const pool=deck.map(c=>({r:c.r,s:c.s}));
+  if(dealer.length>1){
+    pool.push({r:dealer[1].r,s:dealer[1].s});
+  }
+  return pool;
+}
+
+function simDraw(pool){
+  const i=Math.floor(Math.random()*pool.length);
+  return pool.splice(i,1)[0];
+}
+
+function simDealer(upCard,pool){
+  const d=[{r:upCard.r,s:upCard.s},simDraw(pool)];
+
+  while(true){
+    const v=handValue(d);
+    const shouldHit=v.total<17 || (v.total===17 && v.soft && settings.hitSoft17);
+    if(!shouldHit) break;
+    d.push(simDraw(pool));
+  }
+
+  return handValue(d).total;
+}
+
+function simPlayerAfterHit(startCards,pool){
+  const p=startCards.map(c=>({r:c.r,s:c.s}));
+  p.push(simDraw(pool));
+
+  while(true){
+    const v=handValue(p);
+    if(v.total>=21) return v.total;
+
+    // Once a hit has been taken, continue using hit/stand strategy only.
+    const move=strategyFor(p,cardValue(dealer[0]),{
+      allowSplit:false,
+      allowDouble:false
+    }).action;
+
+    if(move==="stand") return v.total;
+    p.push(simDraw(pool));
+  }
+}
+
+function isSimWin(playerTotal,dealerTotal){
+  if(playerTotal>21) return false;
+  if(dealerTotal>21) return true;
+  return playerTotal>dealerTotal;
+}
+
+function estimateWinChances(iterations){
+  const hand=activeHand();
+  if(!hand || dealer.length<2) return null;
+
+  const basePool=unseenPoolForSimulation();
+  const standTotal=handValue(hand.cards).total;
+  let hitWins=0;
+  let standWins=0;
+
+  for(let i=0;i<iterations;i++){
+    // Stand now.
+    {
+      const pool=basePool.map(c=>({r:c.r,s:c.s}));
+      const dealerTotal=simDealer(dealer[0],pool);
+      if(isSimWin(standTotal,dealerTotal)) standWins++;
+    }
+
+    // Hit now, then play subsequent hit/stand decisions correctly.
+    {
+      const pool=basePool.map(c=>({r:c.r,s:c.s}));
+      const playerTotal=simPlayerAfterHit(hand.cards,pool);
+
+      if(playerTotal<=21){
+        const dealerTotal=simDealer(dealer[0],pool);
+        if(isSimWin(playerTotal,dealerTotal)) hitWins++;
+      }
+    }
+  }
+
+  return {
+    hit:hitWins/iterations,
+    stand:standWins/iterations
+  };
+}
+
 function scoreDecision(action){
   const hand=activeHand();
   if(!hand || hand.finished || dealerAnimating) return;
@@ -1147,6 +1307,9 @@ async function dealerPlayAnimated(){
 
 async function finishRound(){
   handInProgress=false;
+  chanceJob++;
+  $("hitChance").textContent="";
+  $("standChance").textContent="";
   await dealerPlayAnimated();
   render(true);
 
@@ -1366,6 +1529,12 @@ $("soft17Setting").onchange=e=>{
   localStorage.setItem("bjHitSoft17",settings.hitSoft17?"1":"0");
 };
 
+$("winChanceSetting").onchange=e=>{
+  settings.showWinChances=e.target.checked;
+  localStorage.setItem("bjShowWinChances",settings.showWinChances?"1":"0");
+  scheduleWinChanceUpdate();
+};
+
 $("dealerDelaySetting").onchange=e=>{
   settings.dealerDelay=Number(e.target.value);
   localStorage.setItem("bjDealerDelay",String(settings.dealerDelay));
@@ -1382,6 +1551,7 @@ const legacyBlackjack=localStorage.getItem("bjProhibitBlackjacks");
 settings.prohibitAutomaticStands=savedAutoStand!==null
   ? savedAutoStand!=="0"
   : legacyBlackjack!=="0";
+settings.showWinChances=localStorage.getItem("bjShowWinChances")==="1";
 const savedSplitMode=localStorage.getItem("bjSplitMode");
 const savedDoubleMode=localStorage.getItem("bjDoubleMode");
 settings.splitMode=savedSplitMode || (localStorage.getItem("bjAllowSplit")==="0" ? "off" : "on");
@@ -1392,6 +1562,7 @@ settings.dealerDelay=Number(localStorage.getItem("bjDealerDelay")||"2000");
 settings.playerName=localStorage.getItem("bjPlayerName")||"YOU";
 
 $("blackjackSetting").checked=settings.prohibitAutomaticStands;
+$("winChanceSetting").checked=settings.showWinChances;
 updateModeControls();
 $("backgroundSetting").value=settings.background;
 $("soft17Setting").checked=settings.hitSoft17;
