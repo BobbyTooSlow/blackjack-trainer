@@ -9,8 +9,8 @@
   <title>Blackjack Trainer</title>
   <style>
     :root{
-      --felt:#0f6b3b;
-      --felt-dark:#083f25;
+      --felt:#161616;
+      --felt-dark:#000000;
       --text:#fff;
       --muted:rgba(255,255,255,.78);
       --line:rgba(255,255,255,.18);
@@ -39,7 +39,7 @@
     body{
       min-height:100vh;
       padding:
-        calc(env(safe-area-inset-top) + 8px)
+        calc(env(safe-area-inset-top) + 24px)
         12px
         calc(env(safe-area-inset-bottom) + 14px);
       background:
@@ -47,9 +47,9 @@
         linear-gradient(var(--felt),var(--felt-dark));
     }
 
-    body.black-theme{
-      --felt:#161616;
-      --felt-dark:#000;
+    body.green-theme{
+      --felt:#0f6b3b;
+      --felt-dark:#083f25;
     }
 
     .app{
@@ -118,6 +118,78 @@
       font-size:36px;
       line-height:.9;
       padding-right:2px;
+    }
+
+    .card-face{
+      position:relative;
+      flex:1;
+      width:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      margin-top:2px;
+    }
+
+    .pip-grid{
+      position:relative;
+      width:100%;
+      height:100%;
+      min-height:72px;
+    }
+
+    .pip{
+      position:absolute;
+      transform:translate(-50%,-50%);
+      font-size:24px;
+      line-height:1;
+      font-weight:900;
+    }
+
+    .face-art{
+      width:100%;
+      height:100%;
+      min-height:72px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-direction:column;
+      border:2px solid currentColor;
+      border-radius:7px;
+      font-weight:950;
+      font-family:Georgia,"Times New Roman",serif;
+      overflow:hidden;
+      position:relative;
+      background:linear-gradient(135deg,rgba(255,255,255,.95),rgba(245,245,245,.95));
+    }
+
+    .face-art .royal{
+      font-size:34px;
+      line-height:1;
+      z-index:2;
+    }
+
+    .face-art .royal-suit{
+      font-size:27px;
+      line-height:1;
+      z-index:2;
+      margin-top:2px;
+    }
+
+    .face-art:before,
+    .face-art:after{
+      content:"";
+      position:absolute;
+      width:55%;
+      height:55%;
+      border:2px solid currentColor;
+      transform:rotate(45deg);
+      opacity:.2;
+    }
+
+    .ace-center{
+      font-size:42px;
+      line-height:1;
+      font-weight:900;
     }
 
     .card.red{color:#c81e1e}
@@ -442,8 +514,8 @@
     </section>
 
     <section id="decisionBox" class="status-box">
-      <div id="decisionTitle" class="decision-title">TRAINER</div>
-      <div id="decisionText" class="status-text">Your decision feedback will stay here.</div>
+      <div id="decisionTitle" class="decision-title"></div>
+      <div id="decisionText" class="status-text"></div>
       <div id="decisionExtra" class="subtext"></div>
       <div id="whyContainer"></div>
     </section>
@@ -461,7 +533,7 @@
     <button id="settingsBtn" class="settings-btn" aria-label="Settings">⚙︎</button>
   </div>
 
-  <div class="footer">No natural blackjacks are dealt in training mode.</div>
+  <div class="footer"></div>
 </main>
 
 <div id="settingsModal" class="modal-backdrop" role="dialog" aria-modal="true">
@@ -474,6 +546,17 @@
         <div class="setting-note">Label shown above your cards.</div>
       </div>
       <input id="playerNameSetting" class="control name-input" type="text" maxlength="20" value="YOU" />
+    </div>
+
+    <div class="setting-row">
+      <div>
+        <strong>Prohibit blackjacks</strong>
+        <div class="setting-note">Redeal natural blackjacks so every hand is trainable.</div>
+      </div>
+      <label class="switch">
+        <input id="blackjackSetting" type="checkbox" checked />
+        <span class="slider"></span>
+      </label>
     </div>
 
     <div class="setting-row">
@@ -504,8 +587,8 @@
         <div class="setting-note">Choose the table background.</div>
       </div>
       <select id="backgroundSetting" class="control">
-        <option value="green">Green</option>
         <option value="black">Black</option>
+        <option value="green">Green</option>
       </select>
     </div>
 
@@ -555,15 +638,16 @@ let stats={correct:0,attempts:0,streak:0};
 let settings={
   allowSplit:true,
   allowDouble:true,
-  background:"green",
+  background:"black",
   hitSoft17:true,
   dealerDelay:2000,
-  playerName:"YOU"
+  playerName:"YOU",
+  prohibitBlackjacks:true
 };
 
 let persistentDecision={
-  title:"TRAINER",
-  text:"Your decision feedback will stay here.",
+  title:"",
+  text:"",
   extra:"",
   type:"",
   why:""
@@ -630,11 +714,47 @@ function isNatural(cards){
   return cards.length===2 && handValue(cards).total===21;
 }
 
+function pipPositions(rank){
+  const pos={
+    "2":[[50,22],[50,78]],
+    "3":[[50,18],[50,50],[50,82]],
+    "4":[[30,24],[70,24],[30,76],[70,76]],
+    "5":[[30,22],[70,22],[50,50],[30,78],[70,78]],
+    "6":[[30,20],[70,20],[30,50],[70,50],[30,80],[70,80]],
+    "7":[[30,18],[70,18],[50,35],[30,50],[70,50],[30,82],[70,82]],
+    "8":[[30,16],[70,16],[50,31],[30,43],[70,43],[50,57],[30,84],[70,84]],
+    "9":[[30,15],[70,15],[30,34],[70,34],[50,50],[30,66],[70,66],[30,85],[70,85]],
+    "10":[[30,13],[70,13],[50,25],[30,36],[70,36],[30,64],[70,64],[50,75],[30,87],[70,87]]
+  };
+  return pos[rank]||[];
+}
+
+function renderCardFace(c){
+  if(c.r==="A"){
+    return `<div class="card-face"><div class="ace-center">${c.s}</div></div>`;
+  }
+
+  if(["J","Q","K"].includes(c.r)){
+    const names={J:"JACK",Q:"QUEEN",K:"KING"};
+    return `<div class="card-face">
+      <div class="face-art">
+        <div class="royal">${names[c.r]}</div>
+        <div class="royal-suit">${c.s}</div>
+      </div>
+    </div>`;
+  }
+
+  const pips=pipPositions(c.r)
+    .map(([x,y])=>`<span class="pip" style="left:${x}%;top:${y}%">${c.s}</span>`)
+    .join("");
+  return `<div class="card-face"><div class="pip-grid">${pips}</div></div>`;
+}
+
 function renderCard(c,hidden=false){
   const red=c.s==="♥"||c.s==="♦";
   return `<div class="card ${red?"red":""} ${hidden?"hidden":""}">
     <div class="corner"><span>${c.r}</span><span>${c.s}</span></div>
-    <div class="suit-big">${c.s}</div>
+    ${renderCardFace(c)}
   </div>`;
 }
 
@@ -1032,9 +1152,11 @@ function splitHand(){
     {cards:[second,draw()],finished:false,doubled:false}
   );
 
-  for(const h of [hands[activeHandIndex],hands[activeHandIndex+1]]){
-    while(isNatural(h.cards)){
-      h.cards[1]=draw();
+  if(settings.prohibitBlackjacks){
+    for(const h of [hands[activeHandIndex],hands[activeHandIndex+1]]){
+      while(isNatural(h.cards)){
+        h.cards[1]=draw();
+      }
     }
   }
 
@@ -1046,7 +1168,7 @@ function dealTrainableRound(){
   do{
     p=[draw(),draw()];
     d=[draw(),draw()];
-  }while(isNatural(p) || isNatural(d));
+  }while(settings.prohibitBlackjacks && (isNatural(p) || isNatural(d)));
 
   return {p,d};
 }
@@ -1062,8 +1184,8 @@ function newHand(){
 
   setOutcome("PLAY", "Finish the hand.", "");
   persistentDecision={
-    title:"YOUR DECISION",
-    text:"Choose the best play.",
+    title:"",
+    text:"",
     extra:"",
     type:"",
     why:""
@@ -1092,6 +1214,11 @@ $("settingsModal").onclick=e=>{
   }
 };
 
+$("blackjackSetting").onchange=e=>{
+  settings.prohibitBlackjacks=e.target.checked;
+  localStorage.setItem("bjProhibitBlackjacks",settings.prohibitBlackjacks?"1":"0");
+};
+
 $("splitSetting").onchange=e=>{
   settings.allowSplit=e.target.checked;
   localStorage.setItem("bjAllowSplit",settings.allowSplit?"1":"0");
@@ -1107,7 +1234,7 @@ $("doubleSetting").onchange=e=>{
 $("backgroundSetting").onchange=e=>{
   settings.background=e.target.value;
   localStorage.setItem("bjBackground",settings.background);
-  document.body.classList.toggle("black-theme",settings.background==="black");
+  document.body.classList.toggle("green-theme",settings.background==="green");
 };
 
 $("soft17Setting").onchange=e=>{
@@ -1126,13 +1253,15 @@ $("playerNameSetting").oninput=e=>{
   $("playerLabel").textContent=settings.playerName;
 };
 
+settings.prohibitBlackjacks=localStorage.getItem("bjProhibitBlackjacks")!=="0";
 settings.allowSplit=localStorage.getItem("bjAllowSplit")!=="0";
 settings.allowDouble=localStorage.getItem("bjAllowDouble")!=="0";
-settings.background=localStorage.getItem("bjBackground")||"green";
+settings.background=localStorage.getItem("bjBackground")||"black";
 settings.hitSoft17=localStorage.getItem("bjHitSoft17")!=="0";
 settings.dealerDelay=Number(localStorage.getItem("bjDealerDelay")||"2000");
 settings.playerName=localStorage.getItem("bjPlayerName")||"YOU";
 
+$("blackjackSetting").checked=settings.prohibitBlackjacks;
 $("splitSetting").checked=settings.allowSplit;
 $("doubleSetting").checked=settings.allowDouble;
 $("backgroundSetting").value=settings.background;
@@ -1141,7 +1270,7 @@ $("dealerDelaySetting").value=String(settings.dealerDelay);
 $("playerNameSetting").value=settings.playerName;
 $("playerLabel").textContent=settings.playerName;
 
-document.body.classList.toggle("black-theme",settings.background==="black");
+document.body.classList.toggle("green-theme",settings.background==="green");
 
 buildDeck();
 updateStats();
