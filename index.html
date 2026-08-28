@@ -740,7 +740,7 @@
   </style>
 </head>
 <body>
-<div id="versionTag" class="version-tag">v2.0.2</div>
+<div id="versionTag" class="version-tag">v2.0.3</div>
 <main class="app">
 
   <section class="section dealer-section">
@@ -1419,6 +1419,15 @@ function estimateWinChances(iterations){
 }
 
 
+function showWelcomeBanner(){
+  const banner=$("comicResult");
+  if(!banner) return;
+  banner.className="comic-result push show";
+  $("comicScore").textContent="WELCOME";
+  $("comicInsight").textContent="Let's learn Blackjack";
+  $("newHandBtn").disabled=false;
+}
+
 function hideComicResult(){
   const banner=$("comicResult");
   if(!banner) return;
@@ -1854,6 +1863,7 @@ buildDeck();
 updateStats();
 renderDecisionBox();
 render(false);
+showWelcomeBanner();
 </script>
 </body>
 </html>
