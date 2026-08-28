@@ -52,6 +52,22 @@
       --felt-dark:#083f25;
     }
 
+    .version-tag{
+      position:fixed;
+      top:calc(env(safe-area-inset-top, 0px) + 7px);
+      right:10px;
+      z-index:50;
+      padding:4px 7px;
+      border-radius:7px;
+      background:rgba(255,255,255,.12);
+      border:1px solid rgba(255,255,255,.18);
+      color:rgba(255,255,255,.78);
+      font-size:12px;
+      font-weight:850;
+      letter-spacing:.2px;
+      pointer-events:none;
+    }
+
     .app{
       width:100%;
       max-width:760px;
@@ -310,7 +326,7 @@
       line-height:1.05;
     }
 
-    .outcome.reveal-odds{
+    .status-box.reveal-odds{
       cursor:pointer;
       user-select:none;
       display:flex;
@@ -320,23 +336,18 @@
       text-align:center;
       min-height:82px;
     }
-    .outcome.reveal-odds .reveal-top{
-      display:block;
+    .status-box.reveal-odds #outcomeTitle{
+      margin-bottom:5px;
       font-size:24px;
-      font-weight:950;
-      line-height:1;
-      letter-spacing:.4px;
+      text-align:center;
     }
-    .outcome.reveal-odds .reveal-bottom{
-      display:block;
-      margin-top:4px;
+    .status-box.reveal-odds #outcomeText{
       font-size:22px;
       font-weight:950;
       line-height:1;
-      letter-spacing:.4px;
+      text-align:center;
     }
-
-    .chance{
+.chance{
       display:block;
       min-height:14px;
       margin-top:3px;
@@ -352,6 +363,7 @@
 
     .teach-hidden.teach-cue{
       visibility:visible !important;
+      opacity:1;
     }
 
     #hitBtn{background:var(--hit)}
@@ -597,6 +609,7 @@
   </style>
 </head>
 <body>
+<div id="versionTag" class="version-tag">v1.9.0</div>
 <main class="app">
 
   <section class="section dealer-section">
@@ -973,6 +986,8 @@ function setDecisionFeedback(title,text,type="",why=""){
 
 function setOutcome(title,text,type=""){
   const box=$("outcomeBox");
+  if(!box) return;
+  box.onclick=null;
   box.className=`status-box ${type}`;
   $("outcomeTitle").textContent=title;
   $("outcomeText").textContent=text;
@@ -1143,13 +1158,15 @@ let chanceJob=0;
 let oddsRevealed=false;
 
 function setRevealOddsBox(){
-  const box=$("outcome");
+  const box=$("outcomeBox");
   const hand=activeHand();
   if(!box || !handInProgress || dealerAnimating || !hand || hand.finished) return;
 
-  box.className="outcome reveal-odds";
-  box.innerHTML=`<span class="reveal-top">SHOW</span><span class="reveal-bottom">ODDS</span>`;
+  box.className="status-box reveal-odds";
+  $("outcomeTitle").textContent="SHOW";
+  $("outcomeText").textContent="ODDS";
   box.onclick=()=>{
+    if(!handInProgress || dealerAnimating) return;
     oddsRevealed=true;
     scheduleWinChanceUpdate();
   };
@@ -1201,6 +1218,7 @@ function unseenPoolForSimulation(){
 }
 
 function simDraw(pool){
+  if(!pool.length) return null;
   const i=Math.floor(Math.random()*pool.length);
   return pool.splice(i,1)[0];
 }
@@ -1354,8 +1372,8 @@ async function finishRound(){
   chanceJob++;
   $("hitChance").textContent="";
   $("standChance").textContent="";
-  $("outcome").onclick=null;
-  $("outcome").classList.remove("reveal-odds");
+  $("outcomeBox").onclick=null;
+  $("outcomeBox").classList.remove("reveal-odds");
   await dealerPlayAnimated();
   render(true);
 
@@ -1410,11 +1428,12 @@ function nextPlayableHand(){
   for(let i=activeHandIndex+1;i<hands.length;i++){
     if(!hands[i].finished){
       activeHandIndex=i;
+      hideOddsForNewDecision();
       render(false);
       return;
     }
   }
-  finishRound();
+  void finishRound();
 }
 
 function hit(){
@@ -1424,6 +1443,7 @@ function hit(){
 
   scoreDecision("hit");
   hand.cards.push(draw());
+  hideOddsForNewDecision();
   render(false);
 
   const total=handValue(hand.cards).total;
@@ -1451,6 +1471,10 @@ function doubleDown(){
 
   scoreDecision("double");
   hand.cards.push(draw());
+  oddsRevealed=false;
+  chanceJob++;
+  $("hitChance").textContent="";
+  $("standChance").textContent="";
   hand.finished=true;
   hand.doubled=true;
   render(false);
@@ -1474,6 +1498,7 @@ function splitHand(){
     {cards:[second,draw()],finished:false,doubled:false}
   );
 
+  hideOddsForNewDecision();
   render(false);
 }
 
@@ -1490,13 +1515,17 @@ function dealTrainableRound(){
 function newHand(){
   if(dealerAnimating) return;
 
+  oddsRevealed=false;
+  chanceJob++;
+  $("hitChance").textContent="";
+  $("standChance").textContent="";
+
   const dealt=dealTrainableRound();
   dealer=dealt.d;
   hands=[{cards:dealt.p,finished:false,doubled:false}];
   activeHandIndex=0;
   handInProgress=true;
 
-  setOutcome("PLAY", "Finish the hand.", "");
   persistentDecision={
     title:"",
     text:"",
