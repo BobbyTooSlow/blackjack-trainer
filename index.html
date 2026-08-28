@@ -78,6 +78,135 @@
       padding:4px 0 10px;
     }
 
+
+    .dealer-section{
+      position:relative;
+    }
+
+    .comic-result{
+      position:absolute;
+      left:50%;
+      top:56%;
+      transform:translate(-50%,-50%) scale(.7) rotate(-1deg);
+      width:min(92vw,720px);
+      min-height:145px;
+      z-index:35;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding:34px 54px 30px;
+      box-sizing:border-box;
+      color:#fff;
+      filter:drop-shadow(0 9px 6px rgba(0,0,0,.55));
+      pointer-events:none;
+      opacity:0;
+    }
+
+    .comic-result.show{
+      display:flex;
+      animation:comicPop .34s cubic-bezier(.2,1.25,.35,1) forwards;
+    }
+
+    .comic-result::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      z-index:-2;
+      background:
+        radial-gradient(circle at 3px 3px,rgba(0,0,0,.16) 1.5px,transparent 1.7px) 0 0/11px 11px,
+        #ffd21a;
+      clip-path:polygon(
+        1% 49%,10% 40%,3% 29%,17% 27%,11% 14%,27% 18%,30% 4%,
+        42% 15%,50% 1%,58% 15%,70% 5%,73% 19%,89% 14%,84% 29%,
+        98% 33%,89% 44%,99% 55%,87% 61%,95% 76%,80% 75%,81% 91%,
+        67% 83%,61% 99%,50% 88%,39% 99%,34% 84%,18% 92%,19% 77%,
+        4% 80%,12% 65%,1% 59%,9% 53%
+      );
+    }
+
+    .comic-result::after{
+      content:"";
+      position:absolute;
+      inset:5px;
+      z-index:-1;
+      clip-path:inherit;
+      border:0;
+      pointer-events:none;
+      background:transparent;
+      filter:
+        drop-shadow(0 0 0 #111)
+        drop-shadow(3px 0 0 #111)
+        drop-shadow(-3px 0 0 #111)
+        drop-shadow(0 3px 0 #111)
+        drop-shadow(0 -3px 0 #111);
+    }
+
+    .comic-inner{
+      width:100%;
+      transform:rotate(-1deg);
+    }
+
+    .comic-word{
+      font-size:clamp(44px,12vw,82px);
+      line-height:.82;
+      font-weight:1000;
+      letter-spacing:-2px;
+      color:#ef1717;
+      -webkit-text-stroke:3px #111;
+      text-shadow:5px 6px 0 #111;
+      margin-bottom:12px;
+    }
+
+    .comic-score{
+      font-size:clamp(22px,5.7vw,35px);
+      line-height:1.05;
+      font-weight:1000;
+      color:#fff;
+      -webkit-text-stroke:1.5px #111;
+      text-shadow:2px 3px 0 #111;
+    }
+
+    .comic-insight{
+      margin-top:8px;
+      font-size:clamp(17px,4.4vw,27px);
+      line-height:1.08;
+      font-weight:950;
+      color:#111;
+      text-shadow:1px 1px 0 rgba(255,255,255,.5);
+    }
+
+    .comic-result.loss::before{
+      background:
+        radial-gradient(circle at 3px 3px,rgba(0,0,0,.15) 1.5px,transparent 1.7px) 0 0/11px 11px,
+        #54c9ff;
+    }
+
+    .comic-result.push::before{
+      background:
+        radial-gradient(circle at 3px 3px,rgba(0,0,0,.15) 1.5px,transparent 1.7px) 0 0/11px 11px,
+        #86e65e;
+    }
+
+    @keyframes comicPop{
+      0%{opacity:0;transform:translate(-50%,-50%) scale(.45) rotate(-5deg)}
+      72%{opacity:1;transform:translate(-50%,-50%) scale(1.06) rotate(1deg)}
+      100%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(-1deg)}
+    }
+
+    @media(max-width:480px){
+      .comic-result{
+        width:94vw;
+        min-height:132px;
+        padding:27px 34px 25px;
+        top:59%;
+      }
+      .comic-word{
+        -webkit-text-stroke:2px #111;
+        text-shadow:4px 4px 0 #111;
+      }
+    }
+
     .dealer-section{
       padding-top:0;
     }
@@ -609,12 +738,19 @@
   </style>
 </head>
 <body>
-<div id="versionTag" class="version-tag">v1.9.0</div>
+<div id="versionTag" class="version-tag">v2.0.0</div>
 <main class="app">
 
   <section class="section dealer-section">
     <div class="label">DEALER</div>
     <div id="dealerCards" class="cards"></div>
+    <div id="comicResult" class="comic-result" aria-live="polite">
+      <div class="comic-inner">
+        <div id="comicWord" class="comic-word">WHAM!</div>
+        <div id="comicScore" class="comic-score"></div>
+        <div id="comicInsight" class="comic-insight"></div>
+      </div>
+    </div>
   </section>
 
   <div class="divider"></div>
@@ -762,6 +898,8 @@ let activeHandIndex=0;
 let handInProgress=false;
 let dealerAnimating=false;
 let stats={correct:0,attempts:0,streak:0};
+let roundDecisions=0;
+let roundMistakes=0;
 
 let settings={
   splitMode:"on",
@@ -1296,6 +1434,48 @@ function estimateWinChances(iterations){
   };
 }
 
+
+function hideComicResult(){
+  const banner=$("comicResult");
+  if(!banner) return;
+  banner.className="comic-result";
+  banner.classList.remove("show","loss","push");
+}
+
+function resultInsight(resultKind){
+  const perfect=roundMistakes===0;
+
+  if(resultKind==="win"){
+    return perfect
+      ? "You played it right — and it paid off!"
+      : "You got lucky — one or more decisions were off.";
+  }
+
+  if(resultKind==="loss"){
+    return perfect
+      ? "You did everything right — the cards just didn’t cooperate."
+      : "The mistakes cost you this one.";
+  }
+
+  return perfect
+    ? "You played it right — this one ended even."
+    : "You escaped with a push.";
+}
+
+function showComicResult(resultKind,scoreText){
+  const banner=$("comicResult");
+  if(!banner) return;
+
+  banner.className=`comic-result ${resultKind==="loss"?"loss":resultKind==="push"?"push":""}`;
+  $("comicWord").textContent=resultKind==="win" ? "WHAM!" : resultKind==="loss" ? "POW!" : "BAM!";
+  $("comicScore").textContent=scoreText;
+  $("comicInsight").textContent=resultInsight(resultKind);
+
+  // Restart the pop animation every hand.
+  void banner.offsetWidth;
+  banner.classList.add("show");
+}
+
 function scoreDecision(action){
   const hand=activeHand();
   if(!hand || hand.finished || dealerAnimating) return;
@@ -1311,6 +1491,7 @@ function scoreDecision(action){
   });
 
   stats.attempts++;
+  roundDecisions++;
 
   if(action===playable.action){
     stats.correct++;
@@ -1325,6 +1506,7 @@ function scoreDecision(action){
 
     setDecisionFeedback("CORRECT!",`${action.toUpperCase()} is the right available play.${note}`,"good","");
   }else{
+    roundMistakes++;
     stats.streak=0;
     let why=playable.why;
 
@@ -1374,6 +1556,7 @@ async function finishRound(){
   $("standChance").textContent="";
   $("outcomeBox").onclick=null;
   $("outcomeBox").classList.remove("reveal-odds");
+
   await dealerPlayAnimated();
   render(true);
 
@@ -1381,18 +1564,32 @@ async function finishRound(){
 
   if(hands.length===1){
     const p=handValue(hands[0].cards).total;
+    let resultKind="";
+    let scoreText="";
 
     if(p>21){
+      resultKind="loss";
+      scoreText=`You busted (${p})`;
       setOutcome("LOSS!",`You bust (${p})`,"bad");
     }else if(dealerTotal>21){
+      resultKind="win";
+      scoreText=`The dealer busted (${dealerTotal})`;
       setOutcome("WIN!",`Dealer bust (${dealerTotal})`,"good");
     }else if(p>dealerTotal){
+      resultKind="win";
+      scoreText=`You won ${p}–${dealerTotal}`;
       setOutcome("WIN!",`You win ${p} to ${dealerTotal}`,"good");
     }else if(p<dealerTotal){
+      resultKind="loss";
+      scoreText=`Dealer won ${dealerTotal}–${p}`;
       setOutcome("LOSS!",`Dealer wins ${dealerTotal} to ${p}`,"bad");
     }else{
+      resultKind="push";
+      scoreText=`Push ${p}–${dealerTotal}`;
       setOutcome("PUSH",`You both have ${p}`,"");
     }
+
+    showComicResult(resultKind,scoreText);
     return;
   }
 
@@ -1419,9 +1616,19 @@ async function finishRound(){
     }
   });
 
-  const title = wins>losses ? "WIN!" : losses>wins ? "LOSS!" : "PUSH";
-  const type = wins>losses ? "good" : losses>wins ? "bad" : "";
+  const resultKind = wins>losses ? "win" : losses>wins ? "loss" : "push";
+  const title = resultKind==="win" ? "WIN!" : resultKind==="loss" ? "LOSS!" : "PUSH";
+  const type = resultKind==="win" ? "good" : resultKind==="loss" ? "bad" : "";
+
   setOutcome(title,pieces.join(" • "),type);
+
+  let scoreText="";
+  if(dealerTotal>21){
+    scoreText=`Dealer busted (${dealerTotal}) • ${wins}W ${losses}L${pushes?` ${pushes}P`:""}`;
+  }else{
+    scoreText=`${wins} win${wins===1?"":"s"} • ${losses} loss${losses===1?"":"es"}${pushes?` • ${pushes} push${pushes===1?"":"es"}`:""}`;
+  }
+  showComicResult(resultKind,scoreText);
 }
 
 function nextPlayableHand(){
@@ -1515,6 +1722,9 @@ function dealTrainableRound(){
 function newHand(){
   if(dealerAnimating) return;
 
+  hideComicResult();
+  roundDecisions=0;
+  roundMistakes=0;
   oddsRevealed=false;
   chanceJob++;
   $("hitChance").textContent="";
