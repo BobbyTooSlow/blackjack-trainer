@@ -738,7 +738,7 @@
       .status-text{font-size:15px}
     }
   
-    /* v2.0.13 layout refinements */
+    /* v2.0.14 layout refinements */
     .actions button{
       aspect-ratio:1 / 1;
       min-height:0;
@@ -782,7 +782,7 @@
     }
 
 
-    /* v2.0.13: compact stats, large value above one-line label */
+    /* v2.0.14: compact stats, large value above one-line label */
     .stats-row .stat{
       min-height:72px !important;
       padding:7px 4px 6px !important;
@@ -818,7 +818,7 @@
     }
 
 
-    /* v2.0.13 */
+    /* v2.0.14 */
     .actions button{
       font-size:clamp(28px,7vw,40px) !important;
       font-weight:950 !important;
@@ -881,7 +881,7 @@
     }
 
 
-    /* v2.0.13 refinements */
+    /* v2.0.14 refinements */
     .actions button{
       font-size:clamp(25px,6.2vw,35px) !important;
     }
@@ -898,7 +898,7 @@
     }
 
 
-    /* v2.0.13 typography */
+    /* v2.0.14 typography */
     html,body,button,input,select,textarea{
       font-family:"Avenir Next Condensed","Arial Narrow","Helvetica Neue",Arial,sans-serif !important;
       font-weight:700;
@@ -919,7 +919,7 @@
     }
 
 
-    /* v2.0.13 refinements */
+    /* v2.0.14 refinements */
     .actions button{
       font-size:clamp(22px,5.5vw,31px) !important;
       justify-content:flex-start !important;
@@ -959,7 +959,7 @@
     }
 
 
-    /* v2.0.13 layout refinements */
+    /* v2.0.14 layout refinements */
     .dealer-section{
       padding-bottom:8px !important;
       margin-bottom:0 !important;
@@ -1019,7 +1019,7 @@
     }
 
 
-    /* v2.0.13 refinements */
+    /* v2.0.14 refinements */
     .comic-new-hand{
       width:116px !important;
       min-height:84px !important;
@@ -1043,7 +1043,7 @@
     }
 
 
-    /* v2.0.13 refinements */
+    /* v2.0.14 refinements */
     .comic-new-hand{
       font-size:28px !important;
       line-height:1.02 !important;
@@ -1074,7 +1074,7 @@
     }
 
 
-    /* v2.0.13 fixes */
+    /* v2.0.14 fixes */
     .player-section{
       position:relative !important;
       padding-bottom:24px !important;
@@ -1100,12 +1100,38 @@
       transform:translateX(-14px) !important;
     }
 
+
+    /* v2.0.14 fixes */
+    .user-card-divider{
+      display:block !important;
+      width:100% !important;
+      height:1px !important;
+      min-height:1px !important;
+      margin:12px 0 12px !important;
+      padding:0 !important;
+      background:#8d8d8d !important;
+      border:0 !important;
+      opacity:1 !important;
+      position:relative !important;
+      z-index:20 !important;
+      flex:none !important;
+    }
+
+    /* Larger percentages under HIT / STAND */
+    #hitChance,
+    #standChance{
+      font-size:clamp(18px,4.8vw,23px) !important;
+      line-height:1 !important;
+      font-weight:800 !important;
+      margin-top:6px !important;
+    }
+
 </style>
 </head>
 <body>
 <div class="top-controls">
   <button id="settingsBtn" class="top-settings-btn" aria-label="Settings">⚙︎</button>
-  <div id="versionTag" class="version-tag">v2.0.13</div>
+  <div id="versionTag" class="version-tag">v2.0.14</div>
 </div>
 <main class="app">
 
@@ -1130,6 +1156,8 @@
     <div id="handStrip" class="hand-strip" style="display:none"></div>
     <div id="playerCards" class="cards"></div>
   </section>
+<div class="user-card-divider" aria-hidden="true"></div>
+
 
   <div class="actions">
     <button id="hitBtn"><span>HIT</span><span id="hitChance" class="chance"></span></button>
@@ -1183,7 +1211,7 @@
 
     <div class="setting-row">
       <div>
-        <strong>Prohibit automatic stands</strong>
+        <strong>Prohibit obvious stands</strong>
         <div class="setting-note">Redeal initial hands of 18 or higher so the opening decision is never an automatic stand.</div>
       </div>
       <label class="switch">
