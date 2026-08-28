@@ -103,7 +103,7 @@
       border:2px solid rgba(255,255,255,.24);
       background:rgba(23,132,56,.96);
       box-shadow:0 8px 18px rgba(0,0,0,.45);
-      pointer-events:none;
+      pointer-events:auto;
       opacity:0;
     }
 
@@ -115,7 +115,11 @@
     .comic-result.loss{background:rgba(145,35,35,.97)}
     .comic-result.push{background:rgba(47,103,158,.97)}
 
-    .comic-inner{width:100%}
+    .comic-inner{
+      flex:1 1 auto;
+      min-width:0;
+      width:auto;
+    }
     .comic-word{display:none !important}
 
     .comic-score{
@@ -144,7 +148,13 @@
         top:90%;
         width:94vw;
         min-height:84px;
-        padding:12px 16px;
+        padding:12px 12px 12px 16px;
+      }
+      .comic-new-hand{
+        width:92px;
+        min-height:58px;
+        margin-left:9px;
+        font-size:16px;
       }
     }
 
@@ -374,7 +384,7 @@
     .actions{
       width:100%;
       display:grid;
-      grid-template-columns:repeat(5,minmax(0,1fr));
+      grid-template-columns:repeat(4,minmax(0,1fr));
       gap:7px;
       margin:10px 0;
     }
@@ -440,9 +450,29 @@
     #standBtn{background:var(--stand)}
     #splitBtn{background:var(--split)}
     #doubleBtn{background:var(--double)}
-    #newHandBtn{
+    .comic-new-hand{
+      flex:0 0 auto;
+      width:110px;
+      min-height:58px;
+      margin-left:14px;
+      border:0;
+      border-radius:12px;
+      padding:6px 8px;
       background:var(--new);
       color:var(--newText);
+      font-size:18px;
+      font-weight:900;
+      line-height:1.02;
+      text-align:center;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      box-shadow:0 3px 8px rgba(0,0,0,.3);
+      pointer-events:auto;
+    }
+
+    .comic-new-hand:disabled{
+      opacity:.45;
     }
 
     .actions button:disabled{opacity:.34}
@@ -541,7 +571,7 @@
 
     .stats-row{
       display:grid;
-      grid-template-columns:1fr 1fr 58px;
+      grid-template-columns:1fr 1fr 1fr 58px;
       gap:8px;
       align-items:stretch;
       margin-top:8px;
@@ -563,7 +593,7 @@
     }
 
     .stat span{
-      font-size:15px;
+      font-size:13px;
       font-weight:800;
       color:var(--muted);
     }
@@ -710,7 +740,7 @@
   </style>
 </head>
 <body>
-<div id="versionTag" class="version-tag">v2.0.1</div>
+<div id="versionTag" class="version-tag">v2.0.2</div>
 <main class="app">
 
   <section class="section dealer-section">
@@ -721,6 +751,9 @@
         <div id="comicScore" class="comic-score"></div>
         <div id="comicInsight" class="comic-insight"></div>
       </div>
+      <button id="newHandBtn" class="comic-new-hand" type="button">
+        <span>NEW HAND</span>
+      </button>
     </div>
   </section>
 
@@ -737,7 +770,6 @@
     <button id="standBtn"><span>STAND</span><span id="standChance" class="chance"></span></button>
     <button id="splitBtn"><span>SPLIT</span></button>
     <button id="doubleBtn"><span>DOUBLE</span></button>
-    <button id="newHandBtn"><span>NEW HAND</span></button>
   </div>
 
   <div class="compact-feedback-row">
@@ -761,6 +793,10 @@
     <div class="stat">
       <b id="accuracy">—</b>
       <span>CORRECT THIS SESSION</span>
+    </div>
+    <div class="stat">
+      <b id="handsWonPct">—</b>
+      <span>HANDS WON</span>
     </div>
     <button id="settingsBtn" class="settings-btn" aria-label="Settings">⚙︎</button>
   </div>
@@ -867,7 +903,7 @@ let hands=[];
 let activeHandIndex=0;
 let handInProgress=false;
 let dealerAnimating=false;
-let stats={correct:0,attempts:0,streak:0};
+let stats={correct:0,attempts:0,streak:0,handsWon:0,handsResolved:0};
 let roundDecisions=0;
 let roundMistakes=0;
 
@@ -1090,6 +1126,9 @@ function updateStats(){
   $("streak").textContent=stats.streak;
   $("accuracy").textContent=stats.attempts
     ? `${Math.round(stats.correct/stats.attempts*100)}%`
+    : "—";
+  $("handsWonPct").textContent=stats.handsResolved
+    ? `${Math.round(stats.handsWon/stats.handsResolved*100)}%`
     : "—";
 }
 
@@ -1529,6 +1568,10 @@ async function finishRound(){
       setOutcome("PUSH",`You both have ${p}`,"");
     }
 
+    stats.handsResolved++;
+    if(resultKind==="win") stats.handsWon++;
+    updateStats();
+
     showComicResult(resultKind,scoreText);
     return;
   }
@@ -1555,6 +1598,10 @@ async function finishRound(){
       pieces.push(`H${i+1}: push ${p}`);
     }
   });
+
+  stats.handsWon+=wins;
+  stats.handsResolved+=wins+losses+pushes;
+  updateStats();
 
   const resultKind = wins>losses ? "win" : losses>wins ? "loss" : "push";
   const title = resultKind==="win" ? "WIN!" : resultKind==="loss" ? "LOSS!" : "PUSH";
