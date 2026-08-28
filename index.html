@@ -738,7 +738,7 @@
       .status-text{font-size:15px}
     }
   
-    /* v2.0.8 layout refinements */
+    /* v2.0.9 layout refinements */
     .actions button{
       aspect-ratio:1 / 1;
       min-height:0;
@@ -782,7 +782,7 @@
     }
 
 
-    /* v2.0.8: compact stats, large value above one-line label */
+    /* v2.0.9: compact stats, large value above one-line label */
     .stats-row .stat{
       min-height:72px !important;
       padding:7px 4px 6px !important;
@@ -818,7 +818,7 @@
     }
 
 
-    /* v2.0.8 */
+    /* v2.0.9 */
     .actions button{
       font-size:clamp(28px,7vw,40px) !important;
       font-weight:950 !important;
@@ -881,7 +881,7 @@
     }
 
 
-    /* v2.0.8 refinements */
+    /* v2.0.9 refinements */
     .actions button{
       font-size:clamp(25px,6.2vw,35px) !important;
     }
@@ -898,7 +898,7 @@
     }
 
 
-    /* v2.0.8 typography */
+    /* v2.0.9 typography */
     html,body,button,input,select,textarea{
       font-family:"Avenir Next Condensed","Arial Narrow","Helvetica Neue",Arial,sans-serif !important;
       font-weight:700;
@@ -918,12 +918,52 @@
       letter-spacing:0 !important;
     }
 
+
+    /* v2.0.9 refinements */
+    .actions button{
+      font-size:clamp(22px,5.5vw,31px) !important;
+      justify-content:flex-start !important;
+      padding-top:12px !important;
+    }
+
+    .actions button > span:first-child{
+      line-height:1 !important;
+      flex:0 0 auto;
+    }
+
+    .stats-row .stat span{
+      font-size:clamp(19px,5vw,23px) !important;
+      font-weight:800 !important;
+    }
+
+    #decisionBox .decision-title,
+    #decisionBox .status-text{
+      display:inline !important;
+      vertical-align:baseline;
+    }
+
+    #decisionBox .decision-title{
+      margin-right:5px;
+      font-size:24px;
+      line-height:1;
+    }
+
+    #decisionBox .status-text{
+      font-size:18px;
+      line-height:1.08;
+    }
+
+    #decisionBox .subtext,
+    #decisionBox #whyContainer{
+      display:block;
+    }
+
 </style>
 </head>
 <body>
 <div class="top-controls">
   <button id="settingsBtn" class="top-settings-btn" aria-label="Settings">⚙︎</button>
-  <div id="versionTag" class="version-tag">v2.0.8</div>
+  <div id="versionTag" class="version-tag">v2.0.9</div>
 </div>
 <main class="app">
 
@@ -1677,7 +1717,7 @@ function scoreDecision(action){
       note=" Teaching cue: DOUBLE is the preferred full-strategy play.";
     }
 
-    setDecisionFeedback("CORRECT!",`${action.toUpperCase()} is the right available play.${note}`,"good","");
+    setDecisionFeedback("✅",`${action.toUpperCase()} is the right available play.${note}`,"good","");
   }else{
     roundMistakes++;
     stats.streak=0;
@@ -1690,7 +1730,7 @@ function scoreDecision(action){
     }
 
     setDecisionFeedback(
-      "NOT QUITE",
+      "❌",
       `You chose ${action.toUpperCase()}. Better available play: ${playable.action.toUpperCase()}.`,
       "bad",
       why
@@ -1730,6 +1770,7 @@ async function finishRound(){
 
   await dealerPlayAnimated();
   render(true);
+  await sleep(settings.dealerDelay);
 
   const dealerTotal=handValue(dealer).total;
 
@@ -1835,7 +1876,7 @@ function hit(){
   render(false);
 
   const total=handValue(hand.cards).total;
-  if(total>=21){
+  if(total>21){
     hand.finished=true;
     nextPlayableHand();
   }
@@ -1900,7 +1941,45 @@ function dealTrainableRound(){
   return {p,d};
 }
 
-function newHand(){
+async function dealInitialCardsAnimated(){
+  // Select a trainable opening hand first, then reveal the already-drawn
+  // cards one at a time in normal table order:
+  // player, dealer, player, dealer.
+  const dealt=dealTrainableRound();
+
+  dealer=[];
+  hands=[{cards:[],finished:false,doubled:false}];
+  activeHandIndex=0;
+  handInProgress=false;
+  dealerAnimating=true;
+  render(false);
+
+  const sequence=[
+    {who:"player",card:dealt.p[0]},
+    {who:"dealer",card:dealt.d[0]},
+    {who:"player",card:dealt.p[1]},
+    {who:"dealer",card:dealt.d[1]}
+  ];
+
+  for(let i=0;i<sequence.length;i++){
+    if(i>0) await sleep(settings.dealerDelay);
+
+    const item=sequence[i];
+    if(item.who==="player"){
+      hands[0].cards.push(item.card);
+    }else{
+      dealer.push(item.card);
+    }
+    render(false);
+  }
+
+  dealerAnimating=false;
+  handInProgress=true;
+  render(false);
+  setRevealOddsBox();
+}
+
+async function newHand(){
   if(dealerAnimating) return;
 
   hideComicResult();
@@ -1911,12 +1990,6 @@ function newHand(){
   $("hitChance").textContent="";
   $("standChance").textContent="";
 
-  const dealt=dealTrainableRound();
-  dealer=dealt.d;
-  hands=[{cards:dealt.p,finished:false,doubled:false}];
-  activeHandIndex=0;
-  handInProgress=true;
-
   persistentDecision={
     title:"",
     text:"",
@@ -1925,9 +1998,7 @@ function newHand(){
     why:""
   };
   renderDecisionBox();
-  render(false);
-
-  setRevealOddsBox();
+  await dealInitialCardsAnimated();
 }
 
 $("showOddsBtn").onclick=()=>{
