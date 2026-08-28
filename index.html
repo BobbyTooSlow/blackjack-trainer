@@ -28,12 +28,14 @@
 
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 
+    button,input,select,textarea{font-family:inherit}
+
     html,body{
       margin:0;
       min-height:100%;
       background:var(--felt);
       color:var(--text);
-      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      font-family:"Tw Cen MT Condensed Extra Bold","Tw Cen MT Condensed","Arial Narrow","Avenir Next Condensed","Helvetica Neue Condensed Bold",Impact,sans-serif;
     }
 
     body{
@@ -86,124 +88,63 @@
     .comic-result{
       position:absolute;
       left:50%;
-      top:56%;
-      transform:translate(-50%,-50%) scale(.7) rotate(-1deg);
-      width:min(92vw,720px);
-      min-height:145px;
+      top:91%;
+      transform:translate(-50%,-50%) scale(.96);
+      width:min(94vw,720px);
+      min-height:90px;
       z-index:35;
       display:none;
       align-items:center;
       justify-content:center;
       text-align:center;
-      padding:34px 54px 30px;
-      box-sizing:border-box;
+      padding:14px 22px 13px;
       color:#fff;
-      filter:drop-shadow(0 9px 6px rgba(0,0,0,.55));
+      border-radius:15px;
+      border:2px solid rgba(255,255,255,.24);
+      background:rgba(23,132,56,.96);
+      box-shadow:0 8px 18px rgba(0,0,0,.45);
       pointer-events:none;
       opacity:0;
     }
 
     .comic-result.show{
       display:flex;
-      animation:comicPop .34s cubic-bezier(.2,1.25,.35,1) forwards;
+      animation:resultPop .22s ease-out forwards;
     }
 
-    .comic-result::before{
-      content:"";
-      position:absolute;
-      inset:0;
-      z-index:-2;
-      background:
-        radial-gradient(circle at 3px 3px,rgba(0,0,0,.16) 1.5px,transparent 1.7px) 0 0/11px 11px,
-        #ffd21a;
-      clip-path:polygon(
-        1% 49%,10% 40%,3% 29%,17% 27%,11% 14%,27% 18%,30% 4%,
-        42% 15%,50% 1%,58% 15%,70% 5%,73% 19%,89% 14%,84% 29%,
-        98% 33%,89% 44%,99% 55%,87% 61%,95% 76%,80% 75%,81% 91%,
-        67% 83%,61% 99%,50% 88%,39% 99%,34% 84%,18% 92%,19% 77%,
-        4% 80%,12% 65%,1% 59%,9% 53%
-      );
-    }
+    .comic-result.loss{background:rgba(145,35,35,.97)}
+    .comic-result.push{background:rgba(47,103,158,.97)}
 
-    .comic-result::after{
-      content:"";
-      position:absolute;
-      inset:5px;
-      z-index:-1;
-      clip-path:inherit;
-      border:0;
-      pointer-events:none;
-      background:transparent;
-      filter:
-        drop-shadow(0 0 0 #111)
-        drop-shadow(3px 0 0 #111)
-        drop-shadow(-3px 0 0 #111)
-        drop-shadow(0 3px 0 #111)
-        drop-shadow(0 -3px 0 #111);
-    }
-
-    .comic-inner{
-      width:100%;
-      transform:rotate(-1deg);
-    }
-
-    .comic-word{
-      font-size:clamp(44px,12vw,82px);
-      line-height:.82;
-      font-weight:1000;
-      letter-spacing:-2px;
-      color:#ef1717;
-      -webkit-text-stroke:3px #111;
-      text-shadow:5px 6px 0 #111;
-      margin-bottom:12px;
-    }
+    .comic-inner{width:100%}
+    .comic-word{display:none !important}
 
     .comic-score{
-      font-size:clamp(22px,5.7vw,35px);
-      line-height:1.05;
-      font-weight:1000;
+      font-size:clamp(23px,5.5vw,34px);
+      line-height:1;
+      font-weight:900;
       color:#fff;
-      -webkit-text-stroke:1.5px #111;
-      text-shadow:2px 3px 0 #111;
+      letter-spacing:.15px;
     }
 
     .comic-insight{
-      margin-top:8px;
-      font-size:clamp(17px,4.4vw,27px);
-      line-height:1.08;
-      font-weight:950;
-      color:#111;
-      text-shadow:1px 1px 0 rgba(255,255,255,.5);
+      margin-top:7px;
+      font-size:clamp(17px,4.2vw,24px);
+      line-height:1.03;
+      font-weight:800;
+      color:#fff;
     }
 
-    .comic-result.loss::before{
-      background:
-        radial-gradient(circle at 3px 3px,rgba(0,0,0,.15) 1.5px,transparent 1.7px) 0 0/11px 11px,
-        #54c9ff;
-    }
-
-    .comic-result.push::before{
-      background:
-        radial-gradient(circle at 3px 3px,rgba(0,0,0,.15) 1.5px,transparent 1.7px) 0 0/11px 11px,
-        #86e65e;
-    }
-
-    @keyframes comicPop{
-      0%{opacity:0;transform:translate(-50%,-50%) scale(.45) rotate(-5deg)}
-      72%{opacity:1;transform:translate(-50%,-50%) scale(1.06) rotate(1deg)}
-      100%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(-1deg)}
+    @keyframes resultPop{
+      0%{opacity:0;transform:translate(-50%,-50%) scale(.92)}
+      100%{opacity:1;transform:translate(-50%,-50%) scale(1)}
     }
 
     @media(max-width:480px){
       .comic-result{
+        top:90%;
         width:94vw;
-        min-height:132px;
-        padding:27px 34px 25px;
-        top:59%;
-      }
-      .comic-word{
-        -webkit-text-stroke:2px #111;
-        text-shadow:4px 4px 0 #111;
+        min-height:84px;
+        padding:12px 16px;
       }
     }
 
@@ -512,6 +453,35 @@
       pointer-events:none !important;
     }
 
+    .compact-feedback-row{
+      display:grid;
+      grid-template-columns:minmax(76px,20%) minmax(0,80%);
+      gap:9px;
+      margin:8px 0 10px;
+      align-items:stretch;
+    }
+
+    .show-odds-panel{
+      border:1px solid rgba(255,255,255,.25);
+      border-radius:15px;
+      background:var(--new);
+      color:var(--newText);
+      min-height:128px;
+      padding:10px 5px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      font-size:20px;
+      font-weight:900;
+      line-height:.9;
+    }
+
+    .show-odds-panel span+span{margin-top:5px}
+    .show-odds-panel:disabled{opacity:.45}
+    .compact-feedback-row .status-box{min-width:0}
+
     .status-row{
       display:grid;
       grid-template-columns:1fr 1fr;
@@ -720,6 +690,8 @@
       .card .suit-big{font-size:35px}
       .actions button{font-size:16px}
       .status-row{grid-template-columns:1fr 1fr}
+      .compact-feedback-row{grid-template-columns:minmax(72px,20%) minmax(0,80%)}
+      .show-odds-panel{font-size:18px;min-height:118px}
       .outcome-title,.decision-title{font-size:24px}
       .status-text{font-size:17px}
       .stat b{font-size:27px}
@@ -738,7 +710,7 @@
   </style>
 </head>
 <body>
-<div id="versionTag" class="version-tag">v2.0.0</div>
+<div id="versionTag" class="version-tag">v2.0.1</div>
 <main class="app">
 
   <section class="section dealer-section">
@@ -746,7 +718,6 @@
     <div id="dealerCards" class="cards"></div>
     <div id="comicResult" class="comic-result" aria-live="polite">
       <div class="comic-inner">
-        <div id="comicWord" class="comic-word">WHAM!</div>
         <div id="comicScore" class="comic-score"></div>
         <div id="comicInsight" class="comic-insight"></div>
       </div>
@@ -769,11 +740,10 @@
     <button id="newHandBtn"><span>NEW HAND</span></button>
   </div>
 
-  <div class="status-row">
-    <section id="outcomeBox" class="status-box">
-      <div id="outcomeTitle" class="outcome-title">READY</div>
-      <div id="outcomeText" class="status-text">Start a new hand.</div>
-    </section>
+  <div class="compact-feedback-row">
+    <button id="showOddsBtn" class="show-odds-panel" type="button">
+      <span>SHOW</span><span>ODDS</span>
+    </button>
 
     <section id="decisionBox" class="status-box">
       <div id="decisionTitle" class="decision-title"></div>
@@ -1083,17 +1053,7 @@ function render(revealDealer=false){
   $("splitBtn").classList.toggle("teach-hidden",settings.splitMode==="teach");
   $("doubleBtn").classList.toggle("teach-hidden",settings.doubleMode==="teach");
   updateTeachingCues();
-  if(handInProgress && !dealerAnimating && !oddsRevealed){
-    setRevealOddsBox();
-  }
-
-  // Keep SHOW / ODDS visible whenever the player is choosing an action.
-  if(handInProgress && !dealerAnimating){
-    const current=activeHand();
-    if(current && !current.finished && !oddsRevealed){
-      setRevealOddsBox();
-    }
-  }
+  setRevealOddsBox();
 }
 
 function renderDecisionBox(){
@@ -1123,12 +1083,7 @@ function setDecisionFeedback(title,text,type="",why=""){
 }
 
 function setOutcome(title,text,type=""){
-  const box=$("outcomeBox");
-  if(!box) return;
-  box.onclick=null;
-  box.className=`status-box ${type}`;
-  $("outcomeTitle").textContent=title;
-  $("outcomeText").textContent=text;
+  // Results are shown in the two-line banner over the cards.
 }
 
 function updateStats(){
@@ -1296,18 +1251,10 @@ let chanceJob=0;
 let oddsRevealed=false;
 
 function setRevealOddsBox(){
-  const box=$("outcomeBox");
+  const btn=$("showOddsBtn");
+  if(!btn) return;
   const hand=activeHand();
-  if(!box || !handInProgress || dealerAnimating || !hand || hand.finished) return;
-
-  box.className="status-box reveal-odds";
-  $("outcomeTitle").textContent="SHOW";
-  $("outcomeText").textContent="ODDS";
-  box.onclick=()=>{
-    if(!handInProgress || dealerAnimating) return;
-    oddsRevealed=true;
-    scheduleWinChanceUpdate();
-  };
+  btn.disabled=!(handInProgress && !dealerAnimating && hand && !hand.finished);
 }
 
 function hideOddsForNewDecision(){
@@ -1315,18 +1262,17 @@ function hideOddsForNewDecision(){
   chanceJob++;
   $("hitChance").textContent="";
   $("standChance").textContent="";
-  if(handInProgress && !dealerAnimating) setRevealOddsBox();
+  setRevealOddsBox();
 }
 
 function scheduleWinChanceUpdate(){
   chanceJob++;
-
   const hand=activeHand();
 
   if(!oddsRevealed || !handInProgress || dealerAnimating || !hand || hand.finished || dealer.length<2){
     $("hitChance").textContent="";
     $("standChance").textContent="";
-    if(handInProgress && !dealerAnimating) setRevealOddsBox();
+    setRevealOddsBox();
     return;
   }
 
@@ -1338,7 +1284,6 @@ function scheduleWinChanceUpdate(){
     if(job!==chanceJob) return;
     const odds=estimateWinChances(10000);
     if(job!==chanceJob || !odds) return;
-
     $("hitChance").textContent=`${Math.round(odds.hit*100)}%`;
     $("standChance").textContent=`${Math.round(odds.stand*100)}%`;
     setRevealOddsBox();
@@ -1447,19 +1392,17 @@ function resultInsight(resultKind){
 
   if(resultKind==="win"){
     return perfect
-      ? "You played it right — and it paid off!"
-      : "You got lucky — one or more decisions were off.";
+      ? "You made the right decisions."
+      : "You got lucky despite an incorrect decision.";
   }
-
   if(resultKind==="loss"){
     return perfect
-      ? "You did everything right — the cards just didn’t cooperate."
-      : "The mistakes cost you this one.";
+      ? "Even though you did everything right."
+      : "Incorrect decisions contributed to the loss.";
   }
-
   return perfect
-    ? "You played it right — this one ended even."
-    : "You escaped with a push.";
+    ? "You made the right decisions."
+    : "You escaped with a push despite an incorrect decision.";
 }
 
 function showComicResult(resultKind,scoreText){
@@ -1467,7 +1410,6 @@ function showComicResult(resultKind,scoreText){
   if(!banner) return;
 
   banner.className=`comic-result ${resultKind==="loss"?"loss":resultKind==="push"?"push":""}`;
-  $("comicWord").textContent=resultKind==="win" ? "WHAM!" : resultKind==="loss" ? "POW!" : "BAM!";
   $("comicScore").textContent=scoreText;
   $("comicInsight").textContent=resultInsight(resultKind);
 
@@ -1554,8 +1496,6 @@ async function finishRound(){
   chanceJob++;
   $("hitChance").textContent="";
   $("standChance").textContent="";
-  $("outcomeBox").onclick=null;
-  $("outcomeBox").classList.remove("reveal-odds");
 
   await dealerPlayAnimated();
   render(true);
@@ -1746,8 +1686,20 @@ function newHand(){
   renderDecisionBox();
   render(false);
 
-  setTimeout(()=>setRevealOddsBox(),0);
+  setRevealOddsBox();
 }
+
+$("showOddsBtn").onclick=()=>{
+  if($("showOddsBtn").disabled) return;
+  oddsRevealed=!oddsRevealed;
+  if(!oddsRevealed){
+    chanceJob++;
+    $("hitChance").textContent="";
+    $("standChance").textContent="";
+    return;
+  }
+  scheduleWinChanceUpdate();
+};
 
 $("hitBtn").onclick=hit;
 $("standBtn").onclick=stand;
