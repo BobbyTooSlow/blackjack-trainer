@@ -738,7 +738,7 @@
       .status-text{font-size:15px}
     }
   
-    /* v2.0.10 layout refinements */
+    /* v2.0.11 layout refinements */
     .actions button{
       aspect-ratio:1 / 1;
       min-height:0;
@@ -782,7 +782,7 @@
     }
 
 
-    /* v2.0.10: compact stats, large value above one-line label */
+    /* v2.0.11: compact stats, large value above one-line label */
     .stats-row .stat{
       min-height:72px !important;
       padding:7px 4px 6px !important;
@@ -818,7 +818,7 @@
     }
 
 
-    /* v2.0.10 */
+    /* v2.0.11 */
     .actions button{
       font-size:clamp(28px,7vw,40px) !important;
       font-weight:950 !important;
@@ -881,7 +881,7 @@
     }
 
 
-    /* v2.0.10 refinements */
+    /* v2.0.11 refinements */
     .actions button{
       font-size:clamp(25px,6.2vw,35px) !important;
     }
@@ -898,7 +898,7 @@
     }
 
 
-    /* v2.0.10 typography */
+    /* v2.0.11 typography */
     html,body,button,input,select,textarea{
       font-family:"Avenir Next Condensed","Arial Narrow","Helvetica Neue",Arial,sans-serif !important;
       font-weight:700;
@@ -919,7 +919,7 @@
     }
 
 
-    /* v2.0.10 refinements */
+    /* v2.0.11 refinements */
     .actions button{
       font-size:clamp(22px,5.5vw,31px) !important;
       justify-content:flex-start !important;
@@ -959,7 +959,7 @@
     }
 
 
-    /* v2.0.10 layout refinements */
+    /* v2.0.11 layout refinements */
     .dealer-section{
       padding-bottom:8px !important;
       margin-bottom:0 !important;
@@ -1018,12 +1018,36 @@
       }
     }
 
+
+    /* v2.0.11 refinements */
+    .comic-new-hand{
+      width:116px !important;
+      min-height:84px !important;
+      font-size:25px !important;
+      line-height:.88 !important;
+      padding:8px 6px !important;
+    }
+
+    /* Nudge the center Decisions label left */
+    .stats-row .stat:nth-child(2) span{
+      text-align:left !important;
+      padding-left:8px !important;
+    }
+
+    @media(max-width:480px){
+      .comic-new-hand{
+        width:104px !important;
+        min-height:80px !important;
+        font-size:23px !important;
+      }
+    }
+
 </style>
 </head>
 <body>
 <div class="top-controls">
   <button id="settingsBtn" class="top-settings-btn" aria-label="Settings">⚙︎</button>
-  <div id="versionTag" class="version-tag">v2.0.10</div>
+  <div id="versionTag" class="version-tag">v2.0.11</div>
 </div>
 <main class="app">
 
@@ -1036,7 +1060,7 @@
         <div id="comicInsight" class="comic-insight"></div>
       </div>
       <button id="newHandBtn" class="comic-new-hand" type="button">
-        <span>NEW HAND</span>
+        <span>NEW<br>HAND</span>
       </button>
     </div>
   </section>
