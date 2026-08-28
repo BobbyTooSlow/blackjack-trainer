@@ -738,7 +738,7 @@
       .status-text{font-size:15px}
     }
   
-    /* v2.0.6 layout refinements */
+    /* v2.0.7 layout refinements */
     .actions button{
       aspect-ratio:1 / 1;
       min-height:0;
@@ -782,7 +782,7 @@
     }
 
 
-    /* v2.0.6: compact stats, large value above one-line label */
+    /* v2.0.7: compact stats, large value above one-line label */
     .stats-row .stat{
       min-height:72px !important;
       padding:7px 4px 6px !important;
@@ -818,7 +818,7 @@
     }
 
 
-    /* v2.0.6 */
+    /* v2.0.7 */
     .actions button{
       font-size:clamp(28px,7vw,40px) !important;
       font-weight:950 !important;
@@ -880,12 +880,29 @@
       letter-spacing:.1px;
     }
 
+
+    /* v2.0.7 refinements */
+    .actions button{
+      font-size:clamp(25px,6.2vw,35px) !important;
+    }
+
+    .stats-row .stat{
+      border:none !important;
+      outline:none !important;
+      box-shadow:none !important;
+    }
+
+    .stats-row .stat span{
+      font-size:clamp(15px,4.1vw,18px) !important;
+      font-weight:900 !important;
+    }
+
 </style>
 </head>
 <body>
 <div class="top-controls">
   <button id="settingsBtn" class="top-settings-btn" aria-label="Settings">⚙︎</button>
-  <div id="versionTag" class="version-tag">v2.0.6</div>
+  <div id="versionTag" class="version-tag">v2.0.7</div>
 </div>
 <main class="app">
 
@@ -1722,8 +1739,10 @@ async function finishRound(){
       setOutcome("PUSH",`You both have ${p}`,"");
     }
 
-    stats.handsResolved++;
-    if(resultKind==="win") stats.handsWon++;
+    if(resultKind!=="push"){
+      stats.handsResolved++;
+      if(resultKind==="win") stats.handsWon++;
+    }
     updateStats();
 
     showComicResult(resultKind,scoreText);
@@ -1754,7 +1773,7 @@ async function finishRound(){
   });
 
   stats.handsWon+=wins;
-  stats.handsResolved+=wins+losses+pushes;
+  stats.handsResolved+=wins+losses;
   updateStats();
 
   const resultKind = wins>losses ? "win" : losses>wins ? "loss" : "push";
