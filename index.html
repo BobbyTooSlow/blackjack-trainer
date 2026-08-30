@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta name="app-version" content="v2.0.19">
+  <meta name="app-version" content="v2.0.20">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0f6b3b" />
@@ -739,7 +739,7 @@
       .status-text{font-size:15px}
     }
   
-    /* v2.0.19 layout refinements */
+    /* v2.0.20 layout refinements */
     .actions button{
       aspect-ratio:1 / 1;
       min-height:0;
@@ -783,7 +783,7 @@
     }
 
 
-    /* v2.0.19: compact stats, large value above one-line label */
+    /* v2.0.20: compact stats, large value above one-line label */
     .stats-row .stat{
       min-height:72px !important;
       padding:7px 4px 6px !important;
@@ -819,7 +819,7 @@
     }
 
 
-    /* v2.0.19 */
+    /* v2.0.20 */
     .actions button{
       font-size:clamp(28px,7vw,40px) !important;
       font-weight:950 !important;
@@ -882,7 +882,7 @@
     }
 
 
-    /* v2.0.19 refinements */
+    /* v2.0.20 refinements */
     .actions button{
       font-size:clamp(25px,6.2vw,35px) !important;
     }
@@ -899,7 +899,7 @@
     }
 
 
-    /* v2.0.19 typography */
+    /* v2.0.20 typography */
     html,body,button,input,select,textarea{
       font-family:"Avenir Next Condensed","Arial Narrow","Helvetica Neue",Arial,sans-serif !important;
       font-weight:700;
@@ -920,7 +920,7 @@
     }
 
 
-    /* v2.0.19 refinements */
+    /* v2.0.20 refinements */
     .actions button{
       font-size:clamp(22px,5.5vw,31px) !important;
       justify-content:flex-start !important;
@@ -960,7 +960,7 @@
     }
 
 
-    /* v2.0.19 layout refinements */
+    /* v2.0.20 layout refinements */
     .dealer-section{
       padding-bottom:8px !important;
       margin-bottom:0 !important;
@@ -1020,7 +1020,7 @@
     }
 
 
-    /* v2.0.19 refinements */
+    /* v2.0.20 refinements */
     .comic-new-hand{
       width:116px !important;
       min-height:84px !important;
@@ -1044,7 +1044,7 @@
     }
 
 
-    /* v2.0.19 refinements */
+    /* v2.0.20 refinements */
     .comic-new-hand{
       font-size:28px !important;
       line-height:1.02 !important;
@@ -1075,7 +1075,7 @@
     }
 
 
-    /* v2.0.19 fixes */
+    /* v2.0.20 fixes */
     .player-section{
       position:relative !important;
       padding-bottom:24px !important;
@@ -1102,7 +1102,7 @@
     }
 
 
-    /* v2.0.19 fixes */
+    /* v2.0.20 fixes */
     .user-card-divider{
       display:block !important;
       width:100% !important;
@@ -1128,7 +1128,7 @@
     }
 
 
-    /* v2.0.19 SHOW ODDS strategy cue */
+    /* v2.0.20 SHOW ODDS strategy cue */
     .actions button.strategy-optimal{
       outline:4px solid #ffd928 !important;
       outline-offset:-4px !important;
@@ -1145,7 +1145,7 @@
     }
 
 
-    /* v2.0.19 counting practice */
+    /* v2.0.20 counting practice */
     .left-tools{
       min-height:112px;
       display:grid;
@@ -1180,7 +1180,7 @@
 
 
 
-    /* v2.0.19 running count appears in the Feedback panel */
+    /* v2.0.20 running count appears in the Feedback panel */
     #decisionBox{
       position:relative;
     }
@@ -1248,7 +1248,7 @@
     }
 
 
-    /* v2.0.19 cache-busting update notice */
+    /* v2.0.20 cache-busting update notice */
     .update-banner{
       position:fixed;
       top:calc(env(safe-area-inset-top,0px) + 8px);
@@ -1307,7 +1307,7 @@
     }
 
 
-    /* v2.0.19 SHOW ODDS / CHECK COUNT refinements */
+    /* v2.0.20 SHOW ODDS / CHECK COUNT refinements */
     .left-tools .show-odds-panel,
     .left-tools .check-count-panel{
       font-size:clamp(18px,4.7vw,22px) !important;
@@ -1328,12 +1328,98 @@
       border-color:#69c8ff !important;
     }
 
+
+    /* v2.0.20 softer training colors */
+    :root{
+      --training-yellow:#f3e7a2;
+      --training-blue:#a8dcf4;
+    }
+
+    .left-tools .show-odds-panel{
+      background:#000 !important;
+      color:var(--training-yellow) !important;
+      border-color:var(--training-yellow) !important;
+    }
+
+    .left-tools .check-count-panel,
+    .left-tools .check-count-panel:disabled{
+      background:#000 !important;
+      color:var(--training-blue) !important;
+      border-color:var(--training-blue) !important;
+    }
+
+    .actions button.strategy-optimal{
+      outline-color:var(--training-yellow) !important;
+      box-shadow:
+        inset 0 0 0 2px rgba(0,0,0,.45),
+        0 0 12px rgba(243,231,162,.62) !important;
+    }
+
+    /* Running count replaces CHECK COUNT for ~2 seconds. */
+    .left-tools .check-count-panel span{
+      transition:opacity .4s ease;
+    }
+
+    .left-tools .check-count-panel.showing-count{
+      font-size:clamp(30px,8.2vw,43px) !important;
+      line-height:.9 !important;
+      letter-spacing:-1px;
+    }
+
+    .left-tools .check-count-panel.count-fade span{
+      opacity:0;
+    }
+
+    /* NEXT HAND is a dedicated initial-card-counting shortcut. */
+    #decisionBox{
+      display:grid !important;
+      grid-template-columns:minmax(0,1fr) auto;
+      gap:10px;
+      align-items:stretch;
+    }
+
+    #decisionContent{
+      min-width:0;
+      align-self:center;
+    }
+
+    .count-next-hand-btn{
+      width:min(23vw,104px);
+      min-height:100%;
+      border:2px solid var(--training-blue);
+      border-radius:12px;
+      background:#000;
+      color:var(--training-blue);
+      font-size:clamp(17px,4.3vw,21px);
+      font-weight:800;
+      line-height:.92;
+      padding:7px 5px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .count-next-hand-btn[hidden]{
+      display:none !important;
+    }
+
+    .count-reset-setting{
+      min-width:118px;
+      background:#000;
+      color:var(--training-blue);
+      border:2px solid var(--training-blue);
+      font-weight:800;
+    }
+
+    /* Old count-panel rules are now inert; the panel itself was removed. */
+
 </style>
 </head>
 <body>
 <div class="top-controls">
   <button id="settingsBtn" class="top-settings-btn" aria-label="Settings">⚙︎</button>
-  <div id="versionTag" class="version-tag">v2.0.19</div>
+  <div id="versionTag" class="version-tag">v2.0.20</div>
 </div>
 <main class="app">
 
@@ -1381,17 +1467,9 @@
         <div id="decisionExtra" class="subtext"></div>
         <div id="whyContainer"></div>
       </div>
-
-      <div id="countPanel" class="count-panel" hidden>
-        <div class="count-panel-copy">
-          <div class="count-panel-label">RUNNING COUNT</div>
-          <div id="countPopupValue" class="count-panel-value">0</div>
-        </div>
-        <div class="count-panel-actions">
-          <button id="resetCountBtn" type="button">RESET COUNT</button>
-          <button id="dismissCountBtn" type="button">DISMISS</button>
-        </div>
-      </div>
+      <button id="countNextHandBtn" class="count-next-hand-btn" type="button">
+        <span>NEXT</span><span>HAND</span>
+      </button>
     </section>
   </div>
 
@@ -1470,6 +1548,25 @@
         <input id="countPracticeSetting" type="checkbox" checked />
         <span class="slider"></span>
       </label>
+    </div>
+
+    <div class="setting-row">
+      <div>
+        <strong>Initial-card counting NEXT HAND button</strong>
+        <div class="setting-note">Skip directly to another opening deal without changing game statistics.</div>
+      </div>
+      <label class="switch">
+        <input id="countNextHandSetting" type="checkbox" checked />
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="setting-row">
+      <div>
+        <strong>Running count</strong>
+        <div class="setting-note">Reset the Hi-Lo running count to zero from this point.</div>
+      </div>
+      <button id="resetCountSettingBtn" class="control count-reset-setting" type="button">RESET COUNT</button>
     </div>
 
     <div class="setting-row">
@@ -1556,7 +1653,8 @@ let settings={
   playerName:"YOU",
   prohibitAutomaticStands:true,
   outlineOptimalMove:true,
-  countPractice:true
+  countPractice:true,
+  countNextHand:true
 };
 
 let persistentDecision={
@@ -1935,7 +2033,7 @@ let oddsRevealed=false;
 
 
 
-const APP_VERSION="v2.0.19";
+const APP_VERSION="v2.0.20";
 
 function versionParts(v){
   return String(v||"").replace(/^v/i,"").split(".").map(n=>parseInt(n,10)||0);
@@ -1990,7 +2088,7 @@ function reloadLatestApp(){
 
 let runningCount=0;
 let countedCards=new WeakSet();
-let countPopupVisible=false;
+let countRevealTimer=0;
 let dealerHoleRevealed=false;
 
 function hiLoValue(card){
@@ -2020,26 +2118,41 @@ function updateRunningCount(){
   });
 }
 
-function hideCountPopup(){
-  countPopupVisible=false;
-  if($("countPanel")) $("countPanel").hidden=true;
-  if($("decisionContent")) $("decisionContent").hidden=false;
+function hideCountReveal(){
+  clearTimeout(countRevealTimer);
+  const btn=$("checkCountBtn");
+  if(!btn) return;
+  btn.classList.remove("showing-count","count-fade");
+  btn.querySelector("span").textContent="CHECK COUNT";
 }
 
-function showCountPopup(){
+function showCountReveal(){
   if(!settings.countPractice) return;
   updateRunningCount();
-  $("countPopupValue").textContent=runningCount>0?`+${runningCount}`:String(runningCount);
-  $("decisionContent").hidden=true;
-  $("countPanel").hidden=false;
-  countPopupVisible=true;
+
+  const btn=$("checkCountBtn");
+  const span=btn.querySelector("span");
+  clearTimeout(countRevealTimer);
+
+  span.textContent=runningCount>0?`+${runningCount}`:String(runningCount);
+  btn.classList.remove("count-fade");
+  btn.classList.add("showing-count");
+
+  // Hold clearly, then fade so the total reveal lasts about two seconds.
+  countRevealTimer=setTimeout(()=>{
+    btn.classList.add("count-fade");
+    countRevealTimer=setTimeout(hideCountReveal,400);
+  },1600);
 }
 
 function resetRunningCount(){
   runningCount=0;
   countedCards=new WeakSet();
+
+  // "Reset" means start from this instant; cards already exposed are not
+  // counted again, but future revealed cards are.
   visibleCountCards().forEach(c=>countedCards.add(c));
-  $("countPopupValue").textContent="0";
+  hideCountReveal();
 }
 
 function clearOptimalMoveOutline(){
@@ -2083,7 +2196,7 @@ function setRevealOddsBox(){
 }
 
 function hideOddsForNewDecision(){
-  hideCountPopup();
+  hideCountReveal();
   oddsRevealed=false;
   chanceJob++;
   $("hitChance").textContent="";
@@ -2311,7 +2424,7 @@ function sleep(ms){
 }
 
 async function dealerPlayAnimated(){
-  hideCountPopup();
+  hideCountReveal();
   dealerHoleRevealed=true;
   updateRunningCount();
   dealerAnimating=true;
@@ -2553,6 +2666,34 @@ async function dealInitialCardsAnimated(){
   setRevealOddsBox();
 }
 
+async function nextCountingHand(){
+  if(dealerAnimating || !settings.countPractice || !settings.countNextHand) return;
+
+  clearOptimalMoveOutline();
+  hideCountReveal();
+  hideComicResult();
+
+  // Abandon this training hand without grading it or changing any stats.
+  roundDecisions=0;
+  roundMistakes=0;
+  oddsRevealed=false;
+  chanceJob++;
+  $("hitChance").textContent="";
+  $("standChance").textContent="";
+
+  persistentDecision={
+    title:"",
+    text:"",
+    extra:"",
+    type:"",
+    why:""
+  };
+  renderDecisionBox();
+
+  // The running count and shoe continue naturally across skipped hands.
+  await dealInitialCardsAnimated();
+}
+
 async function newHand(){
   if(dealerAnimating) return;
 
@@ -2581,10 +2722,10 @@ $("dismissUpdateBtn").onclick=()=>{$("updateBanner").hidden=true;};
 
 $("checkCountBtn").onclick=()=>{
   if($("checkCountBtn").disabled) return;
-  if(countPopupVisible) hideCountPopup(); else showCountPopup();
+  showCountReveal();
 };
-$("resetCountBtn").onclick=resetRunningCount;
-$("dismissCountBtn").onclick=hideCountPopup;
+$("countNextHandBtn").onclick=nextCountingHand;
+$("resetCountSettingBtn").onclick=resetRunningCount;
 
 $("showOddsBtn").onclick=()=>{
   if($("showOddsBtn").disabled) return;
@@ -2629,7 +2770,14 @@ $("countPracticeSetting").onchange=e=>{
   settings.countPractice=e.target.checked;
   localStorage.setItem("bjCountPractice",settings.countPractice?"1":"0");
   $("checkCountBtn").disabled=!settings.countPractice;
-  if(!settings.countPractice) hideCountPopup();
+  updateCountNextHandVisibility();
+  if(!settings.countPractice) hideCountReveal();
+};
+
+$("countNextHandSetting").onchange=e=>{
+  settings.countNextHand=e.target.checked;
+  localStorage.setItem("bjCountNextHand",settings.countNextHand?"1":"0");
+  updateCountNextHandVisibility();
 };
 
 $("outlineOptimalSetting").onchange=e=>{
@@ -2644,6 +2792,12 @@ $("outlineOptimalSetting").onchange=e=>{
 
 
 
+
+function updateCountNextHandVisibility(){
+  const btn=$("countNextHandBtn");
+  if(!btn) return;
+  btn.hidden=!(settings.countPractice && settings.countNextHand);
+}
 
 function updateModeControls(){
   document.querySelectorAll("#splitModeControl button").forEach(btn=>{
@@ -2710,10 +2864,12 @@ settings.dealerDelay=Number(localStorage.getItem("bjDealerDelay")||"2000");
 settings.playerName=localStorage.getItem("bjPlayerName")||"YOU";
 settings.outlineOptimalMove=localStorage.getItem("bjOutlineOptimalMove")!=="0";
 settings.countPractice=localStorage.getItem("bjCountPractice")!=="0";
+settings.countNextHand=localStorage.getItem("bjCountNextHand")!=="0";
 
 $("blackjackSetting").checked=settings.prohibitAutomaticStands;
 $("outlineOptimalSetting").checked=settings.outlineOptimalMove;
 $("countPracticeSetting").checked=settings.countPractice;
+$("countNextHandSetting").checked=settings.countNextHand;
 updateModeControls();
 $("backgroundSetting").value=settings.background;
 $("soft17Setting").checked=settings.hitSoft17;
@@ -2728,6 +2884,7 @@ updateStats();
 renderDecisionBox();
 render(false);
 $("checkCountBtn").disabled=!settings.countPractice;
+updateCountNextHandVisibility();
 showWelcomeBanner();
 checkForAppUpdate();
 </script>
